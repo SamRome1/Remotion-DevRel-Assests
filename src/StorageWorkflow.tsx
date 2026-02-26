@@ -1,315 +1,568 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, staticFile } from 'remotion';
 
+// ── Palette ──────────────────────────────────────────────────────────────────
 const DARK = '#1e1e2e';
-const GRAY_ARROW = '#9a9a9a';
-const GREEN_FILL = '#c8e6c9';
-const GREEN_STROKE = '#43a870';
-const SKETCH_FONT = "'Caveat', 'Comic Sans MS', cursive";
+const ARROW_C = '#9a9a9a';
+const GREEN_F = '#c8e6c9';
+const GREEN_S = '#43a870';
+const FONT = "'Caveat', cursive";
+const FPS = 30;
 
-function itp(frame: number, a: number, b: number, from = 0, to = 1) {
-  return interpolate(frame, [a, b], [from, to], {
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const itp = (
+  frame: number,
+  a: number,
+  b: number,
+  from = 0,
+  to = 1,
+  easing?: (t: number) => number
+) =>
+  interpolate(frame, [a, b], [from, to], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
+    easing,
   });
+
+const sp = (frame: number, start: number, damping = 13, stiffness = 115) =>
+  spring({ frame: frame - start, fps: FPS, config: { damping, stiffness } });
+
+const easeOut = (t: number) => 1 - (1 - t) ** 3;
+
+// Dots traveling along a vertical line
+function VParticles({
+  x,
+  y1,
+  len,
+  cycle,
+  n = 4,
+}: {
+  x: number;
+  y1: number;
+  len: number;
+  cycle: number;
+  n?: number;
+}) {
+  if (cycle < 0) return null;
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => {
+        const t = (cycle + i / n) % 1;
+        const y = y1 + len * t;
+        const op = t < 0.1 ? t / 0.1 : t > 0.88 ? (1 - t) / 0.12 : 0.9;
+        return (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={6}
+            fill={GREEN_S}
+            opacity={Math.max(0, op)}
+            filter="url(#glow)"
+          />
+        );
+      })}
+    </>
+  );
 }
 
+// Dots traveling along a horizontal line
+function HParticles({
+  y,
+  x1,
+  len,
+  cycle,
+  n = 3,
+}: {
+  y: number;
+  x1: number;
+  len: number;
+  cycle: number;
+  n?: number;
+}) {
+  if (cycle < 0) return null;
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => {
+        const t = (cycle + i / n) % 1;
+        const x = x1 + len * t;
+        const op = t < 0.1 ? t / 0.1 : t > 0.88 ? (1 - t) / 0.12 : 0.9;
+        return (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={6}
+            fill={GREEN_S}
+            opacity={Math.max(0, op)}
+            filter="url(#glow)"
+          />
+        );
+      })}
+    </>
+  );
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 export const StorageWorkflow: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // All static elements fade in quickly
-  const allOp = itp(frame, 0, 22);
+  // ── Title ──────────────────────────────────────────
+  const titleOp = itp(frame, 0, 24);
 
-  // Arrow 1 (App → Upload): 18–60
-  const a1 = itp(frame, 18, 62);
-  const A1_X1 = 492;
-  const A1_LEN = 120;
+  // ── App browser ────────────────────────────────────
+  const appS = sp(frame, 8, 11, 105);
+  const appOp = itp(frame, 8, 32);
+  const appSlide = (1 - appS) * -70; // drops in from above
 
-  // Arrow 2 (Upload → Supabase): 52–96
-  const a2 = itp(frame, 52, 98);
-  const A2_X1 = 1014;
-  const A2_LEN = 232;
+  // ── Arrow 1 (down: app → upload) ─────────────────
+  const a1 = itp(frame, 42, 84);
+  const A1_X = 540;
+  const A1_Y1 = 468;
+  const A1_LEN = 132;
 
-  // Arrow 3 (Users → Supabase, curved): 88–158
-  const a3 = itp(frame, 88, 160);
-  // M 825 835  C 825 685, 1040 540, 1248 488  — approx length 640
-  const A3_PATH = 'M 825 835 C 825 685, 1040 540, 1248 488';
-  const A3_LEN = 640;
+  // ── Upload interface ──────────────────────────────
+  const upS = sp(frame, 78, 11, 105);
+  const upOp = itp(frame, 78, 100);
+  const upSlide = (1 - upS) * 70; // rises up
+
+  // Files appear inside upload interface
+  const f1 = itp(frame, 102, 122, 0, 1, easeOut);
+  const f2 = itp(frame, 126, 146, 0, 1, easeOut);
+  const f3 = itp(frame, 150, 170, 0, 1, easeOut);
+  const btnOp = itp(frame, 165, 182);
+
+  // Upload button pulse (scale up-down once)
+  const btnPulse = 1 + 0.08 * Math.sin(itp(frame, 165, 195) * Math.PI);
+
+  // ── Arrow 2 (down: upload → supabase) ────────────
+  const a2 = itp(frame, 164, 204);
+  const A2_X = 540;
+  const A2_Y1 = 940;
+  const A2_LEN = 130;
+
+  // ── Supabase ──────────────────────────────────────
+  const stS = sp(frame, 198, 10, 105);
+  const stOp = itp(frame, 198, 222);
+  const stSlide = (1 - stS) * 80; // bounces up
+
+  const fill = itp(frame, 220, 290, 0, 0.57, easeOut);
+
+  // Fill level glow pulse (once data arrives)
+  const fillGlow = fill > 0.05 ? 0.3 + 0.15 * Math.sin(frame * 0.18) : 0;
+
+  // ── "1 GB LIMIT" badge ─────────────────────────────
+  const limitS = sp(frame, 262, 8, 155); // very bouncy
+  const limitOp = itp(frame, 262, 278);
+
+  // ── Users ────────────────────────────────────────
+  const uS = sp(frame, 210, 11, 105);
+  const uOp = itp(frame, 210, 232);
+  const uSlide = (1 - uS) * -70; // slides in from left
+
+  // ── Arrow 3 (users → supabase, horizontal) ───────
+  const a3 = itp(frame, 236, 278);
+  const A3_Y = 1362;
+  const A3_X1 = 392;
+  const A3_LEN = 196;
+
+  // ── Particle cycles ───────────────────────────────
+  const p1 = frame >= 86 ? ((frame - 86) % 46) / 46 : -1;
+  const p2 = frame >= 206 ? ((frame - 206) % 42) / 42 : -1;
+  const p3 = frame >= 280 ? ((frame - 280) % 50) / 50 : -1;
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#ffffff' }}>
       <svg
-        viewBox="0 0 1920 1080"
-        width={1920}
-        height={1080}
+        viewBox="0 0 1080 1920"
+        width={1080}
+        height={1920}
         style={{ position: 'absolute', inset: 0 }}
       >
         <defs>
-          {/* Hand-drawn displacement filter – position-based, stays stable per frame */}
-          <filter id="sk" x="-5%" y="-5%" width="110%" height="110%">
+          {/* ── Rough hand-drawn filter ── */}
+          <filter id="sk" x="-6%" y="-6%" width="112%" height="112%">
             <feTurbulence
               type="fractalNoise"
               baseFrequency="0.038"
               numOctaves="4"
               seed="7"
-              result="noise"
+              result="n"
             />
             <feDisplacementMap
               in="SourceGraphic"
-              in2="noise"
-              scale="2.4"
+              in2="n"
+              scale="2.2"
               xChannelSelector="R"
               yChannelSelector="G"
             />
           </filter>
 
-          {/* Dot-grid background pattern (Excalidraw default) */}
+          {/* ── Particle glow ── */}
+          <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="5" result="b" />
+            <feMerge>
+              <feMergeNode in="b" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          {/* ── Dot-grid background ── */}
           <pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
-            <circle cx="14" cy="14" r="0.75" fill="#c4c4c4" />
+            <circle cx="14" cy="14" r="0.72" fill="#c0c0c0" />
           </pattern>
         </defs>
 
-        {/* ── Dot-grid background ─────────────────────────────── */}
-        <rect width="1920" height="1080" fill="url(#dots)" />
+        {/* Background */}
+        <rect width="1080" height="1920" fill="url(#dots)" />
 
-        {/* ════════ STATIC ELEMENTS (appear together) ════════ */}
-        <g opacity={allOp} filter="url(#sk)">
+        {/* ── TITLE ─────────────────────────────────────────── */}
+        <text
+          x="540"
+          y="88"
+          textAnchor="middle"
+          fontSize="44"
+          fontWeight="bold"
+          fontFamily={FONT}
+          fill={DARK}
+          opacity={titleOp}
+          filter="url(#sk)"
+        >
+          Storage Workflow
+        </text>
 
-          {/* ───── LAPTOP ───── */}
-          {/* Outer monitor frame */}
-          <rect x="90" y="294" width="398" height="276" rx="8"
-            fill="white" stroke={DARK} strokeWidth="2.5" />
-          {/* Browser chrome strip */}
-          <rect x="100" y="304" width="378" height="30" rx="4"
-            fill="#f2f2f2" stroke={DARK} strokeWidth="1.5" />
-          {/* Traffic-light buttons */}
-          <circle cx="116" cy="319" r="6" fill="#ff6059" stroke={DARK} strokeWidth="1.2" />
-          <circle cx="132" cy="319" r="6" fill="#ffbd2e" stroke={DARK} strokeWidth="1.2" />
-          <circle cx="148" cy="319" r="6" fill="#28c840" stroke={DARK} strokeWidth="1.2" />
-          {/* URL bar */}
-          <rect x="162" y="311" width="220" height="16" rx="3"
+        {/* ════════════════════════════════════════════════════ */}
+        {/*  APP BROWSER                                        */}
+        {/* ════════════════════════════════════════════════════ */}
+        <g opacity={appOp} transform={`translate(0, ${appSlide})`} filter="url(#sk)">
+          {/* Outer frame */}
+          <rect x="150" y="118" width="780" height="294" rx="10"
+            fill="white" stroke={DARK} strokeWidth="2.8" />
+
+          {/* Browser chrome */}
+          <rect x="160" y="128" width="760" height="38" rx="5"
+            fill="#f3f3f3" stroke={DARK} strokeWidth="1.6" />
+          <circle cx="182" cy="147" r="7.5" fill="#ff6059" />
+          <circle cx="204" cy="147" r="7.5" fill="#ffbd2e" />
+          <circle cx="226" cy="147" r="7.5" fill="#28c840" />
+          <rect x="244" y="136" width="330" height="20" rx="4"
             fill="white" stroke="#c8c8c8" strokeWidth="1" />
-          <text x="272" y="323" textAnchor="middle"
-            fontSize="11" fontFamily={SKETCH_FONT} fill="#aaa">SimpleApp.com</text>
-          {/* Page content lines */}
-          {[354, 370, 384, 398, 412].map((y, i) => (
-            <rect key={i} x={100} y={y}
-              width={[290, 340, 268, 316, 252][i]} height={9} rx="2"
-              fill={['#e2e2e2', '#ebebeb', '#ebebeb', '#ebebeb', '#ebebeb'][i]} />
-          ))}
-          {/* Upload CTA in browser */}
-          <rect x="100" y="432" width="160" height="30" rx="4"
-            fill={GREEN_FILL} stroke={GREEN_STROKE} strokeWidth="2" />
-          <text x="180" y="452" textAnchor="middle"
-            fontSize="18" fontWeight="bold" fontFamily={SKETCH_FONT} fill="#1b5e3a">↑ Upload</text>
+          <text x="409" y="151" textAnchor="middle"
+            fontSize="15" fontFamily={FONT} fill="#aaa">SimpleApp.com</text>
 
-          {/* Laptop base */}
-          <path d="M 68 572  L 520 572  L 490 614  L 98 614 Z"
-            fill="#ececec" stroke={DARK} strokeWidth="2.5" />
-          {/* Trackpad */}
-          <rect x="224" y="582" width="130" height="22" rx="4"
-            fill="none" stroke={DARK} strokeWidth="1.8" />
+          {/* Nav links */}
+          <text x="634" y="152" fontSize="15" fontFamily={FONT} fill="#aaa">Home</text>
+          <text x="690" y="152" fontSize="15" fontFamily={FONT} fill={GREEN_S} fontWeight="bold">Upload</text>
+          <text x="756" y="152" fontSize="15" fontFamily={FONT} fill="#aaa">Gallery</text>
 
-          {/* Label */}
-          <text x="294" y="656" textAnchor="middle"
-            fontSize="30" fontFamily={SKETCH_FONT} fill={DARK}>Simple App</text>
+          {/* Fake page content */}
+          <rect x="160" y="182" width="640" height="13" rx="3" fill="#e2e2e2" />
+          <rect x="160" y="203" width="560" height="11" rx="3" fill="#ebebeb" />
+          <rect x="160" y="222" width="600" height="11" rx="3" fill="#ebebeb" />
+          <rect x="160" y="241" width="490" height="11" rx="3" fill="#ebebeb" />
 
+          {/* Upload CTA button (prominent) */}
+          <rect x="160" y="272" width="232" height="42" rx="8"
+            fill={GREEN_F} stroke={GREEN_S} strokeWidth="2.4" />
+          <text x="276" y="300" textAnchor="middle"
+            fontSize="27" fontWeight="bold" fontFamily={FONT} fill="#1b5e3a">↑ Upload</text>
 
-          {/* ───── UPLOAD MODAL ───── */}
-          {/* Dashed border box */}
-          <rect x="622" y="286" width="386" height="292" rx="6"
-            fill="white" stroke={DARK} strokeWidth="2.5" strokeDasharray="14 7" />
-
-          {/* Video icon (circle with play) */}
-          <circle cx="680" cy="350" r="38"
-            fill="#f4f4f4" stroke={DARK} strokeWidth="2" />
-          <circle cx="680" cy="350" r="24"
-            fill="#e0e0e0" stroke={DARK} strokeWidth="1.5" />
-          <polygon points="672,342 672,358 694,350" fill={DARK} />
-          <text x="680" y="408" textAnchor="middle"
-            fontSize="16" fontFamily={SKETCH_FONT} fill={DARK}>Video 1</text>
-
-          {/* Image icon */}
-          <rect x="728" y="318" width="82" height="65" rx="4"
-            fill="#f4f4f4" stroke={DARK} strokeWidth="2" />
-          <path d="M 736 374  L 758 350  L 780 365  L 798 350  L 804 374 Z"
-            fill="#d0d0d0" />
-          <circle cx="798" cy="332" r="8" fill="#fde68a" stroke={DARK} strokeWidth="1.5" />
-          <text x="769" y="408" textAnchor="middle"
-            fontSize="16" fontFamily={SKETCH_FONT} fill={DARK}>Image 1</text>
-
-          {/* Add More box */}
-          <rect x="826" y="318" width="68" height="65" rx="4"
-            fill="#f4f4f4" stroke={DARK} strokeWidth="1.5" strokeDasharray="5 3" />
-          <text x="860" y="360" textAnchor="middle"
-            fontSize="32" fontFamily={SKETCH_FONT} fill={DARK}>+</text>
-          <text x="860" y="408" textAnchor="middle"
-            fontSize="16" fontFamily={SKETCH_FONT} fill={DARK}>Add More</text>
-
-          {/* PHOTO / VIDEO tab buttons */}
-          <rect x="628" y="432" width="154" height="40" rx="4"
-            fill="#e2e2e2" stroke={DARK} strokeWidth="2" />
-          <text x="705" y="458" textAnchor="middle"
-            fontSize="22" fontWeight="bold" fontFamily={SKETCH_FONT} fill={DARK}>PHOTO</text>
-          <rect x="796" y="432" width="154" height="40" rx="4"
-            fill="#e2e2e2" stroke={DARK} strokeWidth="2" />
-          <text x="873" y="458" textAnchor="middle"
-            fontSize="22" fontWeight="bold" fontFamily={SKETCH_FONT} fill={DARK}>VIDEO</text>
-
-          {/* Upload button */}
-          <rect x="658" y="496" width="270" height="48" rx="22"
-            fill={GREEN_FILL} stroke={GREEN_STROKE} strokeWidth="2.5" />
-          <text x="793" y="527" textAnchor="middle"
-            fontSize="26" fontWeight="bold" fontFamily={SKETCH_FONT} fill="#1b5e3a">Upload</text>
-
-
-          {/* ───── SUPABASE CYLINDER ───── */}
-          {/* Label row */}
-          <text x="1355" y="268" textAnchor="middle"
-            fontSize="34" fontWeight="bold" fontFamily={SKETCH_FONT} fill={DARK}>SUPABASE ⚡</text>
-
-          {/* Top ellipse */}
-          <ellipse cx="1355" cy="316" rx="106" ry="30"
-            fill={GREEN_FILL} stroke={GREEN_STROKE} strokeWidth="2.5" />
-          {/* Side walls */}
-          <line x1="1249" y1="316" x2="1249" y2="538" stroke={GREEN_STROKE} strokeWidth="2.5" />
-          <line x1="1461" y1="316" x2="1461" y2="538" stroke={GREEN_STROKE} strokeWidth="2.5" />
-          {/* Body fill (between the two side lines) */}
-          <rect x="1249" y="316" width="212" height="222" fill={GREEN_FILL} />
-          {/* Bottom ellipse drawn over body fill */}
-          <ellipse cx="1355" cy="538" rx="106" ry="30"
-            fill={GREEN_FILL} stroke={GREEN_STROKE} strokeWidth="2.5" />
-          {/* Re-draw side walls on top of fill */}
-          <line x1="1249" y1="316" x2="1249" y2="538" stroke={GREEN_STROKE} strokeWidth="2.5" />
-          <line x1="1461" y1="316" x2="1461" y2="538" stroke={GREEN_STROKE} strokeWidth="2.5" />
-          {/* Segment dividers (wavy lines suggesting stacked cylinders) */}
-          <path d="M 1249 388  Q 1355 405, 1461 388"
-            fill="none" stroke={GREEN_STROKE} strokeWidth="1.5" strokeDasharray="6 3" />
-          <path d="M 1249 464  Q 1355 481, 1461 464"
-            fill="none" stroke={GREEN_STROKE} strokeWidth="1.5" strokeDasharray="6 3" />
-          {/* Right-side dots */}
-          <circle cx="1450" cy="362" r="7" fill="none" stroke={GREEN_STROKE} strokeWidth="1.5" />
-          <circle cx="1450" cy="432" r="7" fill="none" stroke={GREEN_STROKE} strokeWidth="1.5" />
-          <circle cx="1450" cy="504" r="7" fill="none" stroke={GREEN_STROKE} strokeWidth="1.5" />
-          {/* 1 GB LIMIT label */}
-          <text x="1485" y="566" fontSize="22" fontFamily={SKETCH_FONT} fill={DARK}>1 GB LIMIT</text>
-
-
-          {/* ───── USERS ───── */}
-          {/* Speech bubble (yellow) */}
-          <path d="M 704 628  Q 704 608, 726 608  L 908 608  Q 930 608, 930 628  L 930 672  Q 930 694, 908 694  L 784 694  L 764 718  L 772 694  Q 704 694, 704 672 Z"
-            fill="#fde68a" stroke={DARK} strokeWidth="2" />
-
-          {/* Person — left (back-left) */}
-          <circle cx="726" cy="748" r="22" fill="#d4d4d4" stroke={DARK} strokeWidth="2" />
-          <path d="M 708 773  Q 726 788, 744 773  L 741 830  Q 726 843, 711 830 Z"
-            fill="#d4d4d4" stroke={DARK} strokeWidth="2" />
-
-          {/* Person — right (back-right) */}
-          <circle cx="870" cy="748" r="22" fill="#d4d4d4" stroke={DARK} strokeWidth="2" />
-          <path d="M 852 773  Q 870 788, 888 773  L 885 830  Q 870 843, 855 830 Z"
-            fill="#d4d4d4" stroke={DARK} strokeWidth="2" />
-
-          {/* Person — center (front) */}
-          <circle cx="798" cy="752" r="26" fill="#bebebe" stroke={DARK} strokeWidth="2.5" />
-          <path d="M 775 780  Q 798 796, 821 780  L 818 840  Q 798 854, 778 840 Z"
-            fill="#bebebe" stroke={DARK} strokeWidth="2.5" />
-          {/* crosshatch detail on center person's body */}
-          {[-14, -7, 0, 7, 14].map((dx, j) => (
-            <line key={j}
-              x1={798 + dx} y1={782} x2={798 + dx} y2={838}
-              stroke={DARK} strokeWidth="0.7" opacity="0.22" />
-          ))}
-
-          {/* Users label */}
-          <text x="798" y="888" textAnchor="middle"
-            fontSize="34" fontFamily={SKETCH_FONT} fill={DARK}>Users</text>
-
+          {/* Gallery button */}
+          <rect x="408" y="276" width="140" height="34" rx="6"
+            fill="#efefef" stroke={DARK} strokeWidth="1.6" />
+          <text x="478" y="299" textAnchor="middle"
+            fontSize="20" fontFamily={FONT} fill={DARK}>Gallery</text>
         </g>
 
+        <text x="540" y="456" textAnchor="middle"
+          fontSize="30" fontFamily={FONT} fill={DARK}
+          opacity={appOp} filter="url(#sk)">Simple App</text>
 
-        {/* ════════ ANIMATED ARROWS ════════ */}
-
-        {/* ── Arrow 1: App → Upload Modal (horizontal) ── */}
+        {/* ════════════════════════════════════════════════════ */}
+        {/*  ARROW 1  (app → upload, vertical)                  */}
+        {/* ════════════════════════════════════════════════════ */}
         <g filter="url(#sk)">
           {a1 > 0 && (
             <line
-              x1={A1_X1}
-              y1={428}
-              x2={A1_X1 + A1_LEN * a1}
-              y2={428}
-              stroke={GRAY_ARROW}
-              strokeWidth="6"
-              strokeLinecap="round"
+              x1={A1_X} y1={A1_Y1}
+              x2={A1_X} y2={A1_Y1 + A1_LEN * a1}
+              stroke={ARROW_C} strokeWidth="7.5" strokeLinecap="round"
             />
           )}
-          {/* Arrowhead chevron */}
-          {a1 > 0.9 && (
+          {a1 > 0.88 && (
             <path
-              d={`M ${A1_X1 + A1_LEN * a1 - 22} 414
-                  L ${A1_X1 + A1_LEN * a1}      428
-                  L ${A1_X1 + A1_LEN * a1 - 22} 442`}
-              fill="none"
-              stroke={GRAY_ARROW}
-              strokeWidth="5.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d={`M ${A1_X - 18} ${A1_Y1 + A1_LEN * a1 - 26}
+                  L ${A1_X}      ${A1_Y1 + A1_LEN * a1}
+                  L ${A1_X + 18} ${A1_Y1 + A1_LEN * a1 - 26}`}
+              fill="none" stroke={ARROW_C} strokeWidth="7"
+              strokeLinecap="round" strokeLinejoin="round"
             />
           )}
         </g>
 
-        {/* ── Arrow 2: Upload Modal → Supabase (horizontal) ── */}
+        <VParticles x={A1_X} y1={A1_Y1} len={A1_LEN} cycle={p1} />
+
+        {/* ════════════════════════════════════════════════════ */}
+        {/*  UPLOAD INTERFACE                                    */}
+        {/* ════════════════════════════════════════════════════ */}
+        <g opacity={upOp} transform={`translate(0, ${upSlide})`} filter="url(#sk)">
+          {/* Dashed border box */}
+          <rect x="150" y="604" width="780" height="328" rx="9"
+            fill="white" stroke={DARK} strokeWidth="2.8" strokeDasharray="14 6" />
+
+          {/* Header strip */}
+          <rect x="160" y="616" width="760" height="40" rx="5"
+            fill="#f5f5f5" stroke={DARK} strokeWidth="1.6" />
+          <text x="210" y="643" textAnchor="middle"
+            fontSize="24" fontFamily={FONT} fill={DARK}>↑</text>
+          <text x="330" y="643" fontSize="23" fontWeight="bold"
+            fontFamily={FONT} fill={DARK}>Upload Media</text>
+
+          {/* ─ Video icon (play circle) ─ */}
+          <circle cx="232" cy="724" r="46" fill="#f0f0f0" stroke={DARK} strokeWidth="2.2" />
+          <circle cx="232" cy="724" r="29" fill="#e0e0e0" stroke={DARK} strokeWidth="1.6" />
+          <polygon points="223,715 223,733 250,724" fill={DARK} />
+          <text x="232" y="791" textAnchor="middle"
+            fontSize="19" fontFamily={FONT} fill={DARK}>Video 1</text>
+
+          {/* ─ Image icon ─ */}
+          <rect x="308" y="688" width="96" height="76" rx="5"
+            fill="#f0f0f0" stroke={DARK} strokeWidth="2.2" />
+          <path d="M 316 756  L 340 728  L 364 744  L 388 726  L 396 756 Z" fill="#d0d0d0" />
+          <circle cx="390" cy="698" r="10" fill="#fde68a" stroke={DARK} strokeWidth="1.6" />
+          <text x="356" y="791" textAnchor="middle"
+            fontSize="19" fontFamily={FONT} fill={DARK}>Image 1</text>
+
+          {/* ─ Add More ─ */}
+          <rect x="438" y="688" width="80" height="76" rx="5"
+            fill="#f0f0f0" stroke={DARK} strokeWidth="1.6" strokeDasharray="5 3" />
+          <text x="478" y="734" textAnchor="middle"
+            fontSize="42" fontFamily={FONT} fill={DARK}>+</text>
+          <text x="478" y="791" textAnchor="middle"
+            fontSize="19" fontFamily={FONT} fill={DARK}>Add More</text>
+
+          {/* ─ File list (appears one by one) ─ */}
+          <g opacity={f1} transform={`translate(${(1 - f1) * -28}, 0)`}>
+            <text x="542" y="704" fontSize="20" fontFamily={FONT} fill="#555">
+              🖼  vacation_beach.jpg · 2.4 MB
+            </text>
+          </g>
+          <g opacity={f2} transform={`translate(${(1 - f2) * -28}, 0)`}>
+            <text x="542" y="732" fontSize="20" fontFamily={FONT} fill="#555">
+              📸  birthday_party.jpg · 3.1 MB
+            </text>
+          </g>
+          <g opacity={f3} transform={`translate(${(1 - f3) * -28}, 0)`}>
+            <text x="542" y="760" fontSize="20" fontFamily={FONT} fill="#555">
+              🎥  wedding_video.mp4 · 45 MB
+            </text>
+          </g>
+
+          {/* ─ PHOTO / VIDEO tab buttons ─ */}
+          <rect x="160" y="814" width="178" height="48" rx="5"
+            fill="#e2e2e2" stroke={DARK} strokeWidth="2.2" />
+          <text x="249" y="845" textAnchor="middle"
+            fontSize="26" fontWeight="bold" fontFamily={FONT} fill={DARK}>PHOTO</text>
+          <rect x="356" y="814" width="178" height="48" rx="5"
+            fill="#e2e2e2" stroke={DARK} strokeWidth="2.2" />
+          <text x="445" y="845" textAnchor="middle"
+            fontSize="26" fontWeight="bold" fontFamily={FONT} fill={DARK}>VIDEO</text>
+
+          {/* ─ Upload button (pulses before arrow 2 fires) ─ */}
+          <g
+            opacity={btnOp}
+            transform={`translate(540, 898) scale(${btnPulse}) translate(-540, -898)`}
+          >
+            <rect x="168" y="876" width="300" height="52" rx="26"
+              fill={GREEN_F} stroke={GREEN_S} strokeWidth="2.8" />
+            <text x="318" y="910" textAnchor="middle"
+              fontSize="30" fontWeight="bold" fontFamily={FONT} fill="#1b5e3a">Upload</text>
+          </g>
+        </g>
+
+        {/* ════════════════════════════════════════════════════ */}
+        {/*  ARROW 2  (upload → supabase, vertical)             */}
+        {/* ════════════════════════════════════════════════════ */}
         <g filter="url(#sk)">
           {a2 > 0 && (
             <line
-              x1={A2_X1}
-              y1={428}
-              x2={A2_X1 + A2_LEN * a2}
-              y2={428}
-              stroke={GRAY_ARROW}
-              strokeWidth="6"
-              strokeLinecap="round"
+              x1={A2_X} y1={A2_Y1}
+              x2={A2_X} y2={A2_Y1 + A2_LEN * a2}
+              stroke={ARROW_C} strokeWidth="7.5" strokeLinecap="round"
             />
           )}
-          {a2 > 0.9 && (
+          {a2 > 0.88 && (
             <path
-              d={`M ${A2_X1 + A2_LEN * a2 - 22} 414
-                  L ${A2_X1 + A2_LEN * a2}       428
-                  L ${A2_X1 + A2_LEN * a2 - 22}  442`}
-              fill="none"
-              stroke={GRAY_ARROW}
-              strokeWidth="5.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d={`M ${A2_X - 18} ${A2_Y1 + A2_LEN * a2 - 26}
+                  L ${A2_X}      ${A2_Y1 + A2_LEN * a2}
+                  L ${A2_X + 18} ${A2_Y1 + A2_LEN * a2 - 26}`}
+              fill="none" stroke={ARROW_C} strokeWidth="7"
+              strokeLinecap="round" strokeLinejoin="round"
             />
           )}
         </g>
 
-        {/* ── Arrow 3: Users → Supabase (curved) ── */}
+        <VParticles x={A2_X} y1={A2_Y1} len={A2_LEN} cycle={p2} />
+
+        {/* ════════════════════════════════════════════════════ */}
+        {/*  SUPABASE CYLINDER                                   */}
+        {/* ════════════════════════════════════════════════════ */}
+        <g opacity={stOp} transform={`translate(0, ${stSlide})`}>
+          {/* Label */}
+          <text x="734" y="1104" textAnchor="middle"
+            fontSize="36" fontWeight="bold" fontFamily={FONT} fill={DARK} filter="url(#sk)">
+            SUPABASE
+          </text>
+          <image
+            href={staticFile('screenshot-supabase.png')}
+            x="838" y="1070" width="42" height="42"
+            style={{ borderRadius: 8 }}
+          />
+
+          <g filter="url(#sk)">
+            {/* Top ellipse */}
+            <ellipse cx="758" cy="1148" rx="144" ry="38"
+              fill={GREEN_F} stroke={GREEN_S} strokeWidth="2.8" />
+
+            {/* Body background */}
+            <rect x="614" y="1148" width="288" height="308" fill={GREEN_F} />
+
+            {/* Rising water fill (animates from bottom up) */}
+            <rect
+              x="614"
+              y={1148 + 308 * (1 - fill)}
+              width="288"
+              height={308 * fill}
+              fill={`${GREEN_S}44`}
+            />
+
+            {/* Side outlines */}
+            <line x1="614" y1="1148" x2="614" y2="1456" stroke={GREEN_S} strokeWidth="2.8" />
+            <line x1="902" y1="1148" x2="902" y2="1456" stroke={GREEN_S} strokeWidth="2.8" />
+
+            {/* Bottom ellipse */}
+            <ellipse cx="758" cy="1456" rx="144" ry="38"
+              fill={GREEN_F} stroke={GREEN_S} strokeWidth="2.8" />
+
+            {/* Fill level glow ring */}
+            {fill > 0.04 && (
+              <ellipse
+                cx="758"
+                cy={1148 + 308 * (1 - fill)}
+                rx="144"
+                ry="38"
+                fill="none"
+                stroke={GREEN_S}
+                strokeWidth="2.5"
+                opacity={fillGlow + 0.4}
+              />
+            )}
+
+            {/* Horizontal divider arcs */}
+            <path d="M 614 1250  Q 758 1270, 902 1250"
+              fill="none" stroke={GREEN_S} strokeWidth="1.6" strokeDasharray="7 3" />
+            <path d="M 614 1352  Q 758 1372, 902 1352"
+              fill="none" stroke={GREEN_S} strokeWidth="1.6" strokeDasharray="7 3" />
+
+            {/* Right-side knob circles */}
+            <circle cx="890" cy="1206" r="9" fill="none" stroke={GREEN_S} strokeWidth="1.8" />
+            <circle cx="890" cy="1306" r="9" fill="none" stroke={GREEN_S} strokeWidth="1.8" />
+            <circle cx="890" cy="1406" r="9" fill="none" stroke={GREEN_S} strokeWidth="1.8" />
+          </g>
+
+          {/* Storage bar below cylinder */}
+          <g filter="url(#sk)">
+            <rect x="614" y="1478" width="288" height="22" rx="5"
+              fill="#e8e8e8" stroke={DARK} strokeWidth="1.6" />
+            <rect x="614" y="1478" width={288 * fill} height="22" rx="5"
+              fill={GREEN_S} />
+          </g>
+
+          <text x="758" y="1526" textAnchor="middle"
+            fontSize="22" fontFamily={FONT} fill={DARK} filter="url(#sk)">
+            {Math.round(fill * 100)}% used
+          </text>
+
+          {/* "1 GB LIMIT" badge — bouncy entrance */}
+          <g
+            opacity={limitOp}
+            transform={`translate(758, 1564) scale(${0.4 + 0.6 * limitS}) translate(-758, -1564)`}
+          >
+            <rect x="648" y="1545" width="220" height="40" rx="7"
+              fill="#ffeaea" stroke="#c0392b" strokeWidth="2" filter="url(#sk)" />
+            <text x="758" y="1572" textAnchor="middle"
+              fontSize="26" fontFamily={FONT} fill="#c0392b" fontWeight="bold" filter="url(#sk)">
+              1 GB LIMIT
+            </text>
+          </g>
+        </g>
+
+        {/* ════════════════════════════════════════════════════ */}
+        {/*  USERS GROUP                                         */}
+        {/* ════════════════════════════════════════════════════ */}
+        <g opacity={uOp} transform={`translate(${uSlide}, 0)`}>
+          {/* Speech bubble */}
+          <path
+            d="M 68 1208  Q 68 1188, 90 1188  L 376 1188
+               Q 398 1188, 398 1208  L 398 1252
+               Q 398 1274, 376 1274  L 218 1274
+               L 196 1300  L 206 1274
+               Q 68 1274, 68 1252 Z"
+            fill="#fde68a" stroke={DARK} strokeWidth="2.2" filter="url(#sk)"
+          />
+
+          <g filter="url(#sk)">
+            {/* Back-left person */}
+            <circle cx="146" cy="1356" r="30" fill="#d4d4d4" stroke={DARK} strokeWidth="2.2" />
+            <path d="M 122 1388  Q 146 1406, 170 1388  L 167 1462  Q 146 1478, 125 1462 Z"
+              fill="#d4d4d4" stroke={DARK} strokeWidth="2.2" />
+
+            {/* Back-right person */}
+            <circle cx="310" cy="1356" r="30" fill="#d4d4d4" stroke={DARK} strokeWidth="2.2" />
+            <path d="M 286 1388  Q 310 1406, 334 1388  L 331 1462  Q 310 1478, 289 1462 Z"
+              fill="#d4d4d4" stroke={DARK} strokeWidth="2.2" />
+
+            {/* Front center (larger) */}
+            <circle cx="228" cy="1362" r="36" fill="#b8b8b8" stroke={DARK} strokeWidth="2.6" />
+            <path d="M 200 1400  Q 228 1420, 256 1400  L 253 1480  Q 228 1498, 203 1480 Z"
+              fill="#b8b8b8" stroke={DARK} strokeWidth="2.6" />
+            {/* Crosshatch on body */}
+            {[-18, -9, 0, 9, 18].map((dx, j) => (
+              <line key={j}
+                x1={228 + dx} y1={1403} x2={228 + dx} y2={1477}
+                stroke={DARK} strokeWidth="0.9" opacity="0.22"
+              />
+            ))}
+          </g>
+
+          {/* Label */}
+          <text x="228" y="1538" textAnchor="middle"
+            fontSize="38" fontFamily={FONT} fill={DARK} filter="url(#sk)">Users</text>
+        </g>
+
+        {/* ════════════════════════════════════════════════════ */}
+        {/*  ARROW 3  (users → supabase, horizontal)            */}
+        {/* ════════════════════════════════════════════════════ */}
         <g filter="url(#sk)">
           {a3 > 0 && (
-            <path
-              d={A3_PATH}
-              fill="none"
-              stroke={GRAY_ARROW}
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeDasharray={A3_LEN}
-              strokeDashoffset={A3_LEN * (1 - a3)}
+            <line
+              x1={A3_X1} y1={A3_Y}
+              x2={A3_X1 + A3_LEN * a3} y2={A3_Y}
+              stroke={ARROW_C} strokeWidth="7.5" strokeLinecap="round"
             />
           )}
-          {/* Arrowhead at destination — only appears when path nearly complete */}
-          {a3 > 0.92 && (
+          {a3 > 0.88 && (
             <path
-              d="M 1232 486  L 1248 488  L 1240 502"
-              fill="none"
-              stroke={GRAY_ARROW}
-              strokeWidth="5.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              d={`M ${A3_X1 + A3_LEN * a3 - 26} ${A3_Y - 18}
+                  L ${A3_X1 + A3_LEN * a3}       ${A3_Y}
+                  L ${A3_X1 + A3_LEN * a3 - 26}  ${A3_Y + 18}`}
+              fill="none" stroke={ARROW_C} strokeWidth="7"
+              strokeLinecap="round" strokeLinejoin="round"
             />
           )}
         </g>
+
+        <HParticles y={A3_Y} x1={A3_X1} len={A3_LEN} cycle={p3} />
 
       </svg>
     </AbsoluteFill>

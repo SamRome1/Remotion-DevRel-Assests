@@ -18,6 +18,7 @@ import { ProTierCovered } from "./ProTierCovered";
 import { SupabaseCursorPlugin } from "./SupabaseCursorPlugin";
 import { SupabaseCursorPluginH } from "./SupabaseCursorPluginH";
 import { StorageWorkflow } from "./StorageWorkflow";
+import { RawImageStorage } from "./RawImageStorage";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -161,10 +162,18 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="StorageWorkflow"
         component={StorageWorkflow}
-        durationInFrames={210}
+        durationInFrames={320}
         fps={30}
-        width={1920}
-        height={1080}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="RawImageStorage"
+        component={RawImageStorage}
+        durationInFrames={320}
+        fps={30}
+        width={1080}
+        height={1920}
       />
     </>
   );

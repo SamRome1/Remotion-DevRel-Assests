@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, Img, staticFile } from 'remotion';
 
 const GREEN = '#3ecf8e';
 const DARK_BG = '#0f1419';
@@ -176,21 +176,16 @@ export const ProTierCovered: React.FC = () => {
           }}
         >
           {/* Supabase logo mark */}
-          <div
+          <Img
+            src={staticFile('screenshot-supabase.png')}
             style={{
               width: 52,
               height: 52,
               borderRadius: 12,
-              backgroundColor: GREEN,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 28,
               flexShrink: 0,
+              objectFit: 'cover',
             }}
-          >
-            ⚡
-          </div>
+          />
           <div>
             <div
               style={{
