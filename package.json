@@ -6,16 +6,24 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@remotion/cli": "4.0.417",
+    "@remotion/tailwind-v4": "4.0.417",
+    "@theatre/core": "^0.7.2",
+    "@theatre/studio": "^0.7.2",
+    "framer-motion": "^12.34.4",
+    "gsap": "^3.14.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "remotion": "4.0.417",
-    "@remotion/tailwind-v4": "4.0.417",
-    "tailwindcss": "4.0.0"
+    "tailwindcss": "4.0.0",
+    "three": "^0.183.2"
   },
   "devDependencies": {
     "@remotion/eslint-config-flat": "4.0.417",
     "@types/react": "19.2.7",
+    "@types/three": "^0.183.1",
     "@types/web": "0.0.166",
     "eslint": "9.19.0",
     "prettier": "3.6.0",
