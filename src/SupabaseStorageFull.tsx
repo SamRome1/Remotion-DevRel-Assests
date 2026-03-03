@@ -1,18 +1,27 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion';
+
+const SupabaseLogo: React.FC<{ size?: number }> = ({ size = 32 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M11.9 1.036c-.015-.986-1.26-1.41-1.874-.637L.764 12.05C.084 12.957.712 14.25 1.86 14.25h8.238l-.107 8.714c.015.986 1.26 1.41 1.874.637l9.262-11.652c.68-.907.052-2.2-1.098-2.2h-8.238l.108-8.714z"
+      fill="#3ECF8E"
+    />
+  </svg>
+);
 
 const SUPABASE_GREEN = '#3ecf8e';
 const PANEL_BG = '#1c1c1c';
 const PANEL_BORDER = 'rgba(255,255,255,0.08)';
 
 const files = [
-  { name: 'project_intro.mp4', size: 128, icon: '🎬', color: '#8b5cf6' },
-  { name: 'demo_recording.mov', size: 186, icon: '🎥', color: '#3b82f6' },
-  { name: 'final_cut_v3.mp4', size: 210, icon: '🎞️', color: '#f59e0b' },
+  { name: 'project_intro.mp4', size: 380, icon: '🎬', color: '#8b5cf6' },
+  { name: 'demo_recording.mov', size: 460, icon: '🎥', color: '#3b82f6' },
+  { name: 'final_cut_v3.mp4', size: 310, icon: '🎞️', color: '#f59e0b' },
 ];
 
-// cumulative storage after each file: 128, 314, 524 (exceeds 500)
-const LIMIT_MB = 500;
+// cumulative storage after each file: 380, 840, 1150 (exceeds 1000)
+const LIMIT_MB = 1000;
 
 function easeOut(t: number) {
   return 1 - Math.pow(1 - t, 3);
@@ -46,9 +55,9 @@ export const SupabaseStorageFull: React.FC = () => {
     });
     // File 3 stops at the storage limit
     if (i === 2) {
-      // how much of file 3 fits before hitting 500 MB?
-      // used before file 3 = 128 + 186 = 314 MB, remaining = 500 - 314 = 186 MB out of 210
-      const maxFill = 186 / 210; // ~0.886
+      // how much of file 3 fits before hitting 1 GB?
+      // used before file 3 = 380 + 460 = 840 MB, remaining = 1000 - 840 = 160 MB out of 310
+      const maxFill = 160 / 310; // ~0.516
       return Math.min(raw, maxFill);
     }
     return raw;
@@ -71,34 +80,11 @@ export const SupabaseStorageFull: React.FC = () => {
       ? '#f59e0b'
       : '#ef4444';
 
-  // --- Error toast ---
-  const errorFrame = UPLOAD_ENDS[2] + 10;
-  const errorScale = spring({
-    frame: frame - errorFrame,
-    fps: 30,
-    config: { damping: 14, stiffness: 120, mass: 0.8 },
-  });
-  const errorOpacity = interpolate(frame, [errorFrame, errorFrame + 10], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-
-  // --- Complaint bubble ---
-  const complaintFrame = errorFrame + 20;
-  const complaintOpacity = interpolate(frame, [complaintFrame, complaintFrame + 15], [0, 1], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-  });
-  const complaintY = interpolate(frame, [complaintFrame, complaintFrame + 15], [20, 0], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing: easeOut,
-  });
 
   return (
     <AbsoluteFill
       style={{
-        backgroundColor: '#0f1419',
+        backgroundColor: '#0d1f2d',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -113,7 +99,7 @@ export const SupabaseStorageFull: React.FC = () => {
           position: 'absolute',
           width: '100%',
           height: '100%',
-          background: `radial-gradient(circle at 50% 50%, rgba(62, 207, 142, 0.06) 0%, transparent 55%)`,
+          background: `radial-gradient(circle at 50% 50%, rgba(62, 207, 142, 0.14) 0%, rgba(13, 31, 45, 0.0) 65%)`,
           pointerEvents: 'none',
         }}
       />
@@ -149,21 +135,8 @@ export const SupabaseStorageFull: React.FC = () => {
               gap: '14px',
             }}
           >
-            {/* Supabase-style breadcrumb */}
-            <div
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
-                backgroundColor: SUPABASE_GREEN,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-              }}
-            >
-              🗄️
-            </div>
+            {/* Supabase logo */}
+            <SupabaseLogo size={34} />
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ color: '#718096', fontSize: '22px' }}>Storage</span>
               <span style={{ color: '#4a5568', fontSize: '22px' }}>/</span>
@@ -364,7 +337,7 @@ export const SupabaseStorageFull: React.FC = () => {
                 {Math.round(usedMB)}
               </div>
               <div style={{ fontSize: '16px', color: '#718096', marginTop: '4px' }}>
-                / {LIMIT_MB} MB
+                / 1 GB
               </div>
             </div>
           </div>
@@ -414,95 +387,10 @@ export const SupabaseStorageFull: React.FC = () => {
               color: '#718096',
             }}
           >
-            <span style={{ color: '#a0aec0', fontWeight: '600' }}>Free tier</span> · 500 MB limit
+            <span style={{ color: '#a0aec0', fontWeight: '600' }}>Free tier</span> · 1 GB limit
           </div>
         </div>
       </div>
-
-      {/* ─── Error Toast ─── */}
-      {frame >= errorFrame && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '80px',
-            right: '120px',
-            transform: `scale(${errorScale})`,
-            opacity: errorOpacity,
-            transformOrigin: 'top right',
-            backgroundColor: '#1a0a0a',
-            border: '1px solid #ef4444',
-            borderRadius: '12px',
-            padding: '18px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            boxShadow: '0 8px 32px rgba(239,68,68,0.25)',
-          }}
-        >
-          <span style={{ fontSize: '28px' }}>🚫</span>
-          <div>
-            <div style={{ fontSize: '20px', fontWeight: '700', color: '#ef4444' }}>
-              Storage limit reached
-            </div>
-            <div style={{ fontSize: '16px', color: '#a0aec0', marginTop: '4px' }}>
-              Upload failed — 500 MB quota exceeded
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── Complaint Bubble ─── */}
-      {frame >= complaintFrame && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '80px',
-            opacity: complaintOpacity,
-            transform: `translateY(${complaintY}px)`,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '16px',
-          }}
-        >
-          {/* Chat bubble */}
-          <div
-            style={{
-              backgroundColor: '#1e1e2e',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '20px',
-              padding: '22px 36px',
-              maxWidth: '900px',
-              position: 'relative',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: '32px',
-                fontWeight: '700',
-                color: '#fff',
-                textAlign: 'center',
-                lineHeight: 1.4,
-              }}
-            >
-              500 MB?! I uploaded{' '}
-              <span style={{ color: '#ef4444' }}>3 short videos</span> and already maxed it out 🤦
-            </div>
-            <div
-              style={{
-                fontSize: '24px',
-                color: '#718096',
-                textAlign: 'center',
-                marginTop: '10px',
-              }}
-            >
-              Supabase free tier storage fills up{' '}
-              <span style={{ color: '#f59e0b', fontWeight: '600' }}>embarrassingly fast</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Bottom accent */}
       <div
