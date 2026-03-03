@@ -21,6 +21,11 @@ import { StorageWorkflow } from "./StorageWorkflow";
 import { StorageWorkflowDark } from "./StorageWorkflowDark";
 import { RawImageStorage } from "./RawImageStorage";
 import { RangeIsSlow } from "./RangeIsSlow";
+import { StripeSupabaseIntro } from "./StripeSupabaseIntro";
+import { StorageUploadFlow } from "./StorageUploadFlow";
+import { StorageUploadFlow2 } from "./StorageUploadFlow2";
+import { StorageLimitWarning } from "./StorageLimitWarning";
+import { SupabaseIntro } from "./SupabaseIntro";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -189,6 +194,46 @@ export const RemotionRoot: React.FC = () => {
         id="RangeIsSlow"
         component={RangeIsSlow}
         durationInFrames={310}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="StripeSupabaseIntro"
+        component={StripeSupabaseIntro}
+        durationInFrames={180}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="StorageUploadFlow"
+        component={StorageUploadFlow}
+        durationInFrames={320}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="StorageUploadFlow2"
+        component={StorageUploadFlow2}
+        durationInFrames={430}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="StorageLimitWarning"
+        component={StorageLimitWarning}
+        durationInFrames={270}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="SupabaseIntro"
+        component={SupabaseIntro}
+        durationInFrames={200}
         fps={30}
         width={1920}
         height={1080}
