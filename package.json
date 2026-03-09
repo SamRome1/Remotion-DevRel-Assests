@@ -9,6 +9,8 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@remotion/cli": "4.0.417",
+    "@remotion/google-fonts": "^4.0.417",
+    "@remotion/lottie": "^4.0.417",
     "@remotion/tailwind-v4": "4.0.417",
     "@theatre/core": "^0.7.2",
     "@theatre/studio": "^0.7.2",
