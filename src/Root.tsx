@@ -26,6 +26,10 @@ import { StorageUploadFlow } from "./StorageUploadFlow";
 import { StorageUploadFlow2 } from "./StorageUploadFlow2";
 import { StorageLimitWarning } from "./StorageLimitWarning";
 import { SupabaseIntro } from "./SupabaseIntro";
+import { CursorConnecter } from "./CursorConnecter";
+import { CleanCode } from "./CleanCode";
+import { InstaTemplate } from "./InstaTemplate";
+import { ConstraintsDoc } from "./ConstraintsDoc";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -237,6 +241,38 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        id="CursorConnecter"
+        component={CursorConnecter}
+        durationInFrames={121}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="CleanCode"
+        component={CleanCode}
+        durationInFrames={900}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="InstaTemplate"
+        component={InstaTemplate}
+        durationInFrames={900}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ConstraintsDoc"
+        component={ConstraintsDoc}
+        durationInFrames={910}
+        fps={30}
+        width={1080}
+        height={1920}
       />
     </>
   );

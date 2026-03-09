@@ -1,5 +1,5 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const GREEN = '#3ecf8e';
@@ -34,6 +34,11 @@ const CONN2_TOP = STOR_TOP  + STOR_H;
 const COMP_TOP  = CONN2_TOP + CONN_H;
 const CONN3_TOP = COMP_TOP  + COMP_H;
 const DB_TOP    = CONN3_TOP + CONN_H;
+
+// Camera targets: Y offset that centres each section at viewport midpoint (960)
+const STOR_CAM_Y = 960 - (STOR_TOP + STOR_H / 2); //  209
+const COMP_CAM_Y = 960 - (COMP_TOP + COMP_H / 2); // -153
+const DB_CAM_Y   = 960 - (DB_TOP   + DB_H   / 2); // -483
 
 // ── Timing ────────────────────────────────────────────────────────────────────
 const T_IN          = 22;
@@ -194,7 +199,8 @@ const DatabaseCylinder: React.FC<{
   newRowOp: number;
   newRowSlide: number;
   glow: boolean;
-}> = ({ contentOp, newRowOp, newRowSlide, glow }) => {
+  scale: number;
+}> = ({ contentOp, newRowOp, newRowSlide, glow, scale }) => {
   const RX   = PW / 2;
   const RY   = DB_RY;
   const BODY = DB_BODY_H;
@@ -208,7 +214,7 @@ const DatabaseCylinder: React.FC<{
   const R3Y = R2Y + ROW_H;
 
   return (
-    <div style={{ position: 'absolute', left: PX, top: DB_TOP, width: PW, height: SVGH }}>
+    <div style={{ position: 'absolute', left: PX, top: DB_TOP, width: PW, height: SVGH, transform: `scale(${scale})` }}>
       <svg width={PW} height={SVGH}>
         {/* Body */}
         <rect x={0} y={RY} width={PW} height={BODY} fill={PANEL_BG} />
@@ -279,6 +285,36 @@ export const StorageUploadFlow2: React.FC = () => {
   const fadeIn    = itp(frame, 0, T_IN);
   const contentOp = itp(frame, T_CONTENT, T_CONTENT + 15);
 
+  // ── Camera zoom: follows the active section ───────────────────────────────
+  const toStorageT    = itp(frame, T_FLOW1_S, T_FLOW1_S + 28, 0, 1, easeInOut);
+  const toCompressorT = itp(frame, T_FLOW2_S, T_FLOW2_S + 28, 0, 1, easeInOut);
+  const toDatabaseT   = itp(frame, T_FLOW3_S, T_FLOW3_S + 28, 0, 1, easeInOut);
+
+  const cameraScale = 1.0 + 0.05 * toStorageT + 0.03 * toCompressorT + 0.03 * toDatabaseT;
+  const cameraY     = STOR_CAM_Y * toStorageT
+                    + (COMP_CAM_Y - STOR_CAM_Y) * toCompressorT
+                    + (DB_CAM_Y   - COMP_CAM_Y) * toDatabaseT;
+
+  // ── User section: spring scale-in ────────────────────────────────────────
+  const userSpring = spring({ frame: frame - T_CONTENT, fps: 30,
+    config: { damping: 14, stiffness: 150, mass: 1.0 } });
+  const userScale = frame < T_CONTENT ? 0.65 : Math.min(0.65 + 0.35 * userSpring, 1.12);
+
+  // ── Storage panel: pop scale when upload begins ───────────────────────────
+  const storagePop = frame < T_FLOW1_S ? 1
+    : frame < T_FLOW1_S + 10 ? itp(frame, T_FLOW1_S, T_FLOW1_S + 10, 1, 1.06, easeOut)
+    : itp(frame, T_FLOW1_S + 10, T_FLOW1_S + 28, 1.06, 1.0, easeInOut);
+
+  // ── Compressor panel: pop when active ────────────────────────────────────
+  const compPop = frame < T_COMP_IN ? 1
+    : frame < T_COMP_IN + 10 ? itp(frame, T_COMP_IN, T_COMP_IN + 10, 1, 1.06, easeOut)
+    : itp(frame, T_COMP_IN + 10, T_COMP_IN + 28, 1.06, 1.0, easeInOut);
+
+  // ── DB cylinder: punch scale when row arrives ─────────────────────────────
+  const dbPop = frame < T_DB_ROW ? 1
+    : frame < T_DB_ROW + 10 ? itp(frame, T_DB_ROW, T_DB_ROW + 10, 1, 1.07, easeOut)
+    : itp(frame, T_DB_ROW + 10, T_DB_ROW + 28, 1.07, 1.0, easeInOut);
+
   // File card
   const fileOp     = itp(frame, T_FILE, T_FILE + 14);
   const fileScale  = itp(frame, T_FILE, T_FILE + 14, 0.7, 1, easeOut);
@@ -341,6 +377,12 @@ export const StorageUploadFlow2: React.FC = () => {
         pointerEvents: 'none',
       }} />
 
+      {/* ── Camera wrapper — zooms into each section as the story progresses ── */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        transform: `scale(${cameraScale}) translateY(${cameraY}px)`,
+      }}>
+
       {/* ── Single sliding container ── */}
       <div style={{
         position: 'absolute', left: 0, top: 0, width: 1080, height: 1920,
@@ -356,6 +398,7 @@ export const StorageUploadFlow2: React.FC = () => {
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', gap: 12,
           opacity: contentOp,
+          transform: `scale(${userScale})`,
         }}>
           <svg width={72} height={80} viewBox="0 0 72 80">
             <circle cx={36} cy={24} r={20} fill="none" stroke={GREEN} strokeWidth={2.5} />
@@ -375,7 +418,7 @@ export const StorageUploadFlow2: React.FC = () => {
               <span style={{ fontSize: 20 }}>🎬</span>
               <div>
                 <div style={{ fontSize: 13, fontWeight: '600', color: TEXT_BRIGHT }}>demo_video.mp4</div>
-                <div style={{ fontSize: 11, color: TEXT_DIM }}>310 MB</div>
+                <div style={{ fontSize: 11, color: TEXT_DIM }}>3 MB</div>
               </div>
             </div>
           </div>
@@ -402,6 +445,7 @@ export const StorageUploadFlow2: React.FC = () => {
           border: `1px solid ${storageGlow ? GREEN + '55' : PANEL_BORDER}`,
           overflow: 'hidden',
           boxShadow: storageGlow ? `0 0 40px ${GREEN}18` : '0 4px 28px rgba(0,0,0,0.3)',
+          transform: `scale(${storagePop})`,
         }}>
           <div style={{
             backgroundColor: '#0d1117',
@@ -457,7 +501,7 @@ export const StorageUploadFlow2: React.FC = () => {
                 <span style={{ fontSize: 18 }}>🎬</span>
                 <span style={{ fontSize: 13, color: TEXT_BRIGHT, fontWeight: '600' }}>demo_video.mp4</span>
               </div>
-              <span style={{ fontSize: 12, color: GREEN, fontWeight: '600' }}>310 MB</span>
+              <span style={{ fontSize: 12, color: GREEN, fontWeight: '600' }}>3 MB</span>
             </div>
           )}
         </div>
@@ -483,6 +527,7 @@ export const StorageUploadFlow2: React.FC = () => {
           border: `1px solid ${compGlow ? GREEN + '55' : PANEL_BORDER}`,
           overflow: 'hidden',
           boxShadow: compGlow ? `0 0 40px ${GREEN}18` : '0 4px 28px rgba(0,0,0,0.3)',
+          transform: `scale(${compPop})`,
         }}>
           {/* Header */}
           <div style={{
@@ -522,7 +567,7 @@ export const StorageUploadFlow2: React.FC = () => {
                     <span style={{ fontSize: 18 }}>🎬</span>
                     <span style={{ fontSize: 13, color: TEXT_DIM }}>demo_video.mp4</span>
                   </div>
-                  <span style={{ fontSize: 12, color: '#4a5568' }}>310 MB</span>
+                  <span style={{ fontSize: 12, color: '#4a5568' }}>3 MB</span>
                 </div>
               </div>
             )}
@@ -608,9 +653,11 @@ export const StorageUploadFlow2: React.FC = () => {
           newRowOp={dbOp}
           newRowSlide={dbSlide}
           glow={dbGlow}
+          scale={dbPop}
         />
 
-      </div>
+      </div>{/* end entrance slide */}
+      </div>{/* end camera wrapper */}
 
       {/* Bottom accent */}
       <div style={{

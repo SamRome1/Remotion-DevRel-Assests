@@ -2,11 +2,25 @@ import React from 'react';
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, Img, staticFile } from 'remotion';
 
 const GREEN = '#3ecf8e';
-const DARK_BG = '#0f1419';
+const DARK_BG = '#0d1f2d';
 const CARD_BG = 'rgba(255,255,255,0.04)';
 const BORDER = 'rgba(62,207,142,0.2)';
 const PRO_COST = 25;
 const PRICE_PER_USER = 5;
+
+const T_IN = 20;
+
+function itp(
+  frame: number, a: number, b: number,
+  from = 0, to = 1,
+  easing?: (t: number) => number,
+) {
+  return interpolate(frame, [a, b], [from, to], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing,
+  });
+}
 
 const USERS = [
   { color: '#8b5cf6', emoji: '👩‍💻', name: 'Sarah' },
@@ -20,13 +34,15 @@ const USERS = [
 const USER_FRAMES = [85, 112, 139, 166, 193];
 const COVERED_FRAME = USER_FRAMES[4] + 18;
 
-function easeOut(t: number) {
-  return 1 - Math.pow(1 - t, 3);
-}
+function easeOut(t: number) { return 1 - Math.pow(1 - t, 3); }
 
 export const ProTierCovered: React.FC = () => {
   const frame = useCurrentFrame();
   const fps = 30;
+
+  // Entrance
+  const slideY = itp(frame, 0, T_IN, 60, 0, easeOut);
+  const fadeIn = itp(frame, 0, T_IN);
 
   // How many users have fully appeared
   const usersVisible = USER_FRAMES.filter((f) => frame >= f).length;
@@ -85,16 +101,6 @@ export const ProTierCovered: React.FC = () => {
     easing: easeOut,
   });
 
-  // Floating particles
-  const particles = Array.from({ length: 16 }, (_, i) => {
-    const speed = 0.7 + (i % 4) * 0.3;
-    const x = 80 + (i * 123) % 1760;
-    const y = ((i * 80 + frame * speed) % 1150);
-    const size = 3 + (i % 3) * 3;
-    const opacity = 0.06 + (i % 5) * 0.03;
-    return { x, y, size, opacity };
-  });
-
   // Bar color: green throughout, bright green at 100%
   const barColor = coverageWidth >= 0.999 ? GREEN : GREEN;
 
@@ -106,48 +112,22 @@ export const ProTierCovered: React.FC = () => {
         overflow: 'hidden',
       }}
     >
-      {/* Radial glow */}
+      {/* Background glow */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background: `radial-gradient(ellipse 65% 50% at 50% 45%, rgba(62,207,142,${bgPulse}) 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse at 50% 45%, rgba(62,207,142,${bgPulse}) 0%, transparent 60%)`,
           pointerEvents: 'none',
         }}
       />
 
-      {/* Floating particles */}
-      {particles.map((p, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            left: p.x,
-            top: p.y,
-            width: p.size,
-            height: p.size,
-            borderRadius: '50%',
-            backgroundColor: GREEN,
-            opacity: p.opacity,
-          }}
-        />
-      ))}
-
-      {/* Top accent */}
-      <div
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 5,
-          background: `linear-gradient(90deg, transparent, ${GREEN}, transparent)`,
-          opacity: interpolate(frame, [0, 20], [0, 0.6], {
-            extrapolateLeft: 'clamp',
-            extrapolateRight: 'clamp',
-          }),
-        }}
-      />
+      {/* Entrance wrapper */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        transform: `translateY(${slideY}px)`,
+        opacity: fadeIn,
+      }}>
 
       {/* ── Main layout ── */}
       <div
@@ -494,21 +474,14 @@ export const ProTierCovered: React.FC = () => {
         )}
       </div>
 
+      </div>{/* end entrance wrapper */}
+
       {/* Bottom accent */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: 5,
-          background: `linear-gradient(90deg, transparent, ${GREEN}, transparent)`,
-          opacity: interpolate(frame, [60, 100], [0, 0.5], {
-            extrapolateLeft: 'clamp',
-            extrapolateRight: 'clamp',
-          }),
-        }}
-      />
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px',
+        background: `linear-gradient(90deg, transparent, ${GREEN}77, transparent)`,
+        opacity: fadeIn * 0.8,
+      }} />
     </AbsoluteFill>
   );
 };
