@@ -1,277 +1,207 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { loadFont, fontFamily } from '@remotion/google-fonts/Inter';
+
+loadFont('normal', { weights: ['300', '400', '600', '700'] });
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const GREEN = '#3ecf8e';
-const BG = '#0d1f2d';
-const PANEL_BG = '#141c26';
-const PANEL_BORDER = 'rgba(255,255,255,0.08)';
-const TEXT_DIM = '#718096';
-const TEXT_BRIGHT = '#e2e8f0';
+const GREEN  = '#3ecf8e';
+const BG     = '#0f0f0f';
+const DIM    = 'rgba(255,255,255,0.4)';
+const BRIGHT = 'rgba(255,255,255,0.92)';
+const FONT   = `${fontFamily}, system-ui, sans-serif`;
 
-// ── Cylinder dimensions ───────────────────────────────────────────────────────
-const DB_RY = 28;
-const DB_BODY_H = 180;
-const DB_H = DB_RY * 2 + DB_BODY_H; // 236
+// ── Canvas: 1080 × 1920 ───────────────────────────────────────────────────────
+const CX        = 540;
+const ICON_SIZE = 180;
 
-// ── Layout (1080 × 1920) ──────────────────────────────────────────────────────
-const PW = 740;
-const PX = (1080 - PW) / 2; // 170
-const PMX = 1080 / 2;       // 540
+// 4 zones + 3 gaps, centred in 1920px
+const ZONE_H  = 310;
+const GAP_H   = 130;
+const TOP_PAD = Math.round((1920 - (4 * ZONE_H + 3 * GAP_H)) / 2); // ~115
 
-const USER_H = 160;
-const CONN_H = 82;
-const STOR_H = 300;
-const COMP_H = 260;
+const S1_TOP = TOP_PAD;
+const G1_TOP = S1_TOP + ZONE_H;
+const S2_TOP = G1_TOP + GAP_H;
+const G2_TOP = S2_TOP + ZONE_H;
+const S3_TOP = G2_TOP + GAP_H;
+const G3_TOP = S3_TOP + ZONE_H;
+const S4_TOP = G3_TOP + GAP_H;
 
-const TOTAL_H   = USER_H + CONN_H + STOR_H + CONN_H + COMP_H + CONN_H + DB_H; // 1202
-const TOP       = Math.round((1920 - TOTAL_H) / 2);                             // 359
+const ICON1_CY = S1_TOP + ICON_SIZE / 2 + 15;
+const ICON2_CY = S2_TOP + ICON_SIZE / 2 + 15;
+const ICON3_CY = S3_TOP + ICON_SIZE / 2 + 15;
+const ICON4_CY = S4_TOP + ICON_SIZE / 2 + 15;
 
-const USER_TOP  = TOP;
-const CONN1_TOP = USER_TOP  + USER_H;
-const STOR_TOP  = CONN1_TOP + CONN_H;
-const CONN2_TOP = STOR_TOP  + STOR_H;
-const COMP_TOP  = CONN2_TOP + CONN_H;
-const CONN3_TOP = COMP_TOP  + COMP_H;
-const DB_TOP    = CONN3_TOP + CONN_H;
+const LBL1_Y = ICON1_CY + ICON_SIZE / 2 + 26;
+const SUB1_Y = LBL1_Y + 58;
+const LBL2_Y = ICON2_CY + ICON_SIZE / 2 + 26;
+const SUB2_Y = LBL2_Y + 58;
+const LBL3_Y = ICON3_CY + ICON_SIZE / 2 + 26;
+const SUB3_Y = LBL3_Y + 58;
+const LBL4_Y = ICON4_CY + ICON_SIZE / 2 + 26;
+const SUB4_Y = LBL4_Y + 58;
 
-// Camera targets: Y offset that centres each section at viewport midpoint (960)
-const STOR_CAM_Y = 960 - (STOR_TOP + STOR_H / 2); //  209
-const COMP_CAM_Y = 960 - (COMP_TOP + COMP_H / 2); // -153
-const DB_CAM_Y   = 960 - (DB_TOP   + DB_H   / 2); // -483
+// Arrow zones
+const P1_TOP = G1_TOP + 16;
+const P1_BOT = G1_TOP + GAP_H - 16;
+const P2_TOP = G2_TOP + 16;
+const P2_BOT = G2_TOP + GAP_H - 16;
+const P3_TOP = G3_TOP + 16;
+const P3_BOT = G3_TOP + GAP_H - 16;
 
 // ── Timing ────────────────────────────────────────────────────────────────────
-const T_IN          = 22;
-const T_CONTENT     = 35;
-const T_FILE        = 50;
-const T_SEND        = 72;
-const T_FLOW1_S     = 76;
-const T_FLOW1_E     = 140;
-const T_STORED      = 148;
-const T_FLOW2_S     = 162;
-const T_FLOW2_E     = 226;
-const T_COMP_IN     = 233;  // input file appears in compressor
-const T_COMPRESS_S  = 246;  // compression progress starts
-const T_COMPRESS_E  = 306;  // compression completes (2 s)
-const T_COMP_OUT    = 314;  // compressed output appears
-const T_FLOW3_S     = 328;
-const T_FLOW3_E     = 390;
-const T_DB_ROW      = 398;
+const T_USER       = 8;
+const T_ARR1       = 38;
+const T_STOR       = 78;
+const T_ARR2       = 108;
+const T_COMP       = 148;
+const T_COMPRESS_S = 162;
+const T_COMPRESS_E = 222;
+const T_ARR3       = 234;
+const T_DB         = 274;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function easeOut(t: number) { return 1 - (1 - t) ** 3; }
-function easeInOut(t: number) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
 
-function itp(
-  frame: number, a: number, b: number,
-  from = 0, to = 1,
-  easing?: (t: number) => number,
-) {
+function itp(frame: number, a: number, b: number, from = 0, to = 1, easing?: (t: number) => number) {
   return interpolate(frame, [a, b], [from, to], {
-    extrapolateLeft: 'clamp',
-    extrapolateRight: 'clamp',
-    easing,
+    extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing,
   });
 }
 
-// ── Cycling particles ─────────────────────────────────────────────────────────
-const VParticles: React.FC<{ y1: number; y2: number; cycle: number; n?: number }> = ({
-  y1, y2, cycle, n = 4,
-}) => {
-  if (cycle < 0) return null;
+// ── Animated arrow: dashed line draws down, arrowhead fades in at end ─────────
+const VArrow: React.FC<{ y1: number; y2: number; progress: number }> = ({ y1, y2, progress }) => {
+  const ARROW_H  = 26;
+  const lineBot  = y2 - ARROW_H;
+  const totalLen = lineBot - y1;
+  const drawn    = Math.min(progress * totalLen * 1.3, totalLen);
+  const headOp   = Math.max(0, (progress - 0.7) / 0.3);
+
   return (
-    <>
-      {Array.from({ length: n }, (_, i) => {
-        const t = (cycle + i / n) % 1;
-        const y = y1 + (y2 - y1) * t;
-        const op = t < 0.1 ? t / 0.1 : t > 0.86 ? (1 - t) / 0.14 : 1;
-        return (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              left: PMX - 5, top: y - 5,
-              width: 10, height: 10,
-              borderRadius: '50%',
-              backgroundColor: GREEN,
-              opacity: Math.max(0, op) * 0.95,
-              boxShadow: `0 0 14px 3px ${GREEN}99`,
-            }}
-          />
-        );
-      })}
-    </>
+    <svg
+      width={60} height={y2 - y1 + 4}
+      style={{ position: 'absolute', left: CX - 30, top: y1, pointerEvents: 'none', overflow: 'visible' }}
+    >
+      {drawn > 2 && (
+        <line
+          x1={30} y1={0} x2={30} y2={drawn}
+          stroke={GREEN} strokeOpacity={0.5} strokeWidth={2.5}
+          strokeDasharray="10 7" strokeLinecap="round"
+        />
+      )}
+      {headOp > 0 && (
+        <path
+          d={`M 14 ${lineBot - y1} L 30 ${y2 - y1} L 46 ${lineBot - y1}`}
+          fill="none" stroke={GREEN} strokeOpacity={headOp}
+          strokeWidth={4} strokeLinecap="round" strokeLinejoin="round"
+        />
+      )}
+    </svg>
   );
 };
 
-// ── Supabase bolt ─────────────────────────────────────────────────────────────
-const SupabaseLogo: React.FC<{ size?: number }> = ({ size = 26 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M11.9 1.036c-.015-.986-1.26-1.41-1.874-.637L.764 12.05C.084 12.957.712 14.25 1.86 14.25h8.238l-.107 8.714c.015.986 1.26 1.41 1.874.637l9.262-11.652c.68-.907.052-2.2-1.098-2.2h-8.238l.108-8.714z"
-      fill="#3ECF8E"
-    />
+// ── Icon wrapper ──────────────────────────────────────────────────────────────
+const Icon: React.FC<{ cy: number; scale: number; opacity: number; glow: boolean; children: React.ReactNode }> = ({
+  cy, scale, opacity, glow, children,
+}) => (
+  <div style={{
+    position: 'absolute',
+    left: CX - ICON_SIZE / 2,
+    top:  cy  - ICON_SIZE / 2,
+    width: ICON_SIZE, height: ICON_SIZE,
+    opacity, transform: `scale(${scale})`,
+    filter: glow ? `drop-shadow(0 0 32px ${GREEN}99)` : undefined,
+  }}>
+    {children}
+  </div>
+);
+
+// ── Text label ────────────────────────────────────────────────────────────────
+const Lbl: React.FC<{ y: number; text: string; size: number; weight: number; color: string; opacity: number }> = ({
+  y, text, size, weight, color, opacity,
+}) => (
+  <div style={{
+    position: 'absolute', left: 0, right: 0, top: y,
+    textAlign: 'center', opacity,
+    fontFamily: FONT, fontSize: size, fontWeight: weight,
+    color, letterSpacing: '-0.02em', lineHeight: 1,
+  }}>
+    {text}
+  </div>
+);
+
+// ── Official Supabase Auth icon (User) — flat green ───────────────────────────
+const AuthIcon: React.FC<{ size: number }> = ({ size }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" viewBox="0 0 115 115">
+    <rect width="113.52" height="113.52" x=".5" y=".729" fill="#1a1a1a" rx="22.19"/>
+    <path fill={GREEN} fillRule="evenodd" d="M43.17 31.583c0-7.306 5.923-13.23 13.23-13.23 7.306 0 13.23 5.924 13.23 13.23v6.23h2.647c5.523 0 10 4.477 10 10v32.035c0 5.523-4.477 10-10 10H40.242c-5.523 0-10-4.477-10-10V47.813c0-5.523 4.477-10 10-10h2.927zm6 6.23h14.46v-6.23a7.23 7.23 0 0 0-14.46 0zm-8.928 6a4 4 0 0 0-4 4v5.215h22.685a3 3 0 0 1 3 3v20.46a3 3 0 0 1-3 3H36.242v.36a4 4 0 0 0 4 4h32.035a4 4 0 0 0 4-4V47.813a4 4 0 0 0-4-4zm-3.89 29.675h19.575v-4.23H36.352zm0-10.23h19.575v-4.23H36.352z" clipRule="evenodd"/>
+    <rect width="111.655" height="111.655" x="1.432" y="1.661" stroke={GREEN} strokeOpacity=".15" strokeWidth="1.864" rx="21.258"/>
   </svg>
 );
 
-// ── Vertical connector with downward V-chevron arrow ──────────────────────────
-const VConnector: React.FC<{
-  topY: number;
-  label: string;
-  stepNum: number;
-  progress: number;
-  stepDone: boolean;
-}> = ({ topY, label, stepNum, progress, stepDone }) => {
-  const lineLen = CONN_H - 26;
-  const drawn   = progress * lineLen;
-  const fadeIn  = itp(progress, 0.5, 0.9);
-  const cx      = 10;
-  const lineTop = 10;
-  const lineTip = lineTop + drawn;
+// ── Official Supabase Storage icon — flat green ───────────────────────────────
+const StorageIcon: React.FC<{ size: number }> = ({ size }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" viewBox="0 0 114 115">
+    <rect width="113.52" height="113.52" x=".348" y=".729" fill="#1a1a1a" rx="22.19"/>
+    <path fill={GREEN} fillRule="evenodd" d="M41.617 34.565a3 3 0 0 0-3 3v8.281h2.541a9 9 0 0 1 6.312 2.585l3.124 3.073a3 3 0 0 0 2.104.862h23.125v-2.314H64.185a4 4 0 0 1-4-4V34.565zm38.208 9.397a9 9 0 0 0-.653-.724l-12.11-12.052a9 9 0 0 0-6.348-2.62H41.617a9 9 0 0 0-9 9v9.523a9 9 0 0 0-4.433 7.757v22.565a9 9 0 0 0 9 9h39.848a9 9 0 0 0 9-9V61.366c0-3.21-1.68-6.027-4.209-7.62v-4.128a9 9 0 0 0-1.136-4.379 3.6 3.6 0 0 0-.808-1.223zm-13.64-5.155v5.245h5.244zM37.183 51.846a3 3 0 0 0-3 3v22.565a3 3 0 0 0 3 3h39.848a3 3 0 0 0 3-3V61.366a3 3 0 0 0-3-3H52.698a9 9 0 0 1-6.312-2.585l-3.124-3.073a3 3 0 0 0-2.104-.862z" clipRule="evenodd"/>
+    <rect width="111.655" height="111.655" x="1.28" y="1.661" stroke={GREEN} strokeOpacity=".15" strokeWidth="1.864" rx="21.258"/>
+  </svg>
+);
+
+// ── Official Supabase Edge Functions icon — flat green ────────────────────────
+const EdgeFunctionsIcon: React.FC<{ size: number }> = ({ size }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" viewBox="0 0 114 115">
+    <rect width="113.52" height="113.52" y=".729" fill="#1a1a1a" rx="22.19"/>
+    <path fill={GREEN} fillRule="evenodd" d="M56.5 31C41.865 31 30 42.865 30 57.5c0 3.213.57 6.289 1.616 9.134a11.4 11.4 0 0 1 4.36-1.296 21.9 21.9 0 0 1-1.44-7.838c0-12.13 9.834-21.964 21.964-21.964 2.933 0 5.732.575 8.29 1.618a11.4 11.4 0 0 1 1.329-4.355A26.4 26.4 0 0 0 56.5 31m14.153-2.764A32.4 32.4 0 0 0 56.5 25C38.55 25 24 39.55 24 57.5c0 4.876 1.076 9.507 3.004 13.664a11.4 11.4 0 0 0-1.44 5.558c0 6.311 5.117 11.428 11.429 11.428 1.957 0 3.8-.492 5.41-1.36A32.4 32.4 0 0 0 56.5 90C74.45 90 89 75.45 89 57.5c0-4.822-1.052-9.404-2.94-13.526a11.4 11.4 0 0 0 1.535-5.725c0-6.312-5.117-11.429-11.428-11.429-2 0-3.88.514-5.514 1.416M81.4 48.41a11.4 11.4 0 0 1-4.383 1.235 21.9 21.9 0 0 1 1.446 7.854c0 12.13-9.833 21.964-21.964 21.964-2.876 0-5.623-.552-8.14-1.557A11.4 11.4 0 0 1 47 82.247 26.4 26.4 0 0 0 56.5 84C71.135 84 83 72.135 83 57.5c0-3.197-.565-6.257-1.599-9.09M40.688 72.745q.165.171.336.34a5.429 5.429 0 1 1-.336-.341m4.65-3.831a15.9 15.9 0 0 0 11.162 4.55c8.817 0 15.964-7.147 15.964-15.964S65.317 41.536 56.5 41.536 40.536 48.683 40.536 57.5c0 4.26 1.668 8.13 4.386 10.992q.214.206.416.422M76.167 32.82a5.429 5.429 0 1 0 0 10.857 5.429 5.429 0 0 0 0-10.857" clipRule="evenodd"/>
+    <rect width="111.655" height="111.655" x=".932" y="1.661" stroke={GREEN} strokeOpacity=".15" strokeWidth="1.864" rx="21.258"/>
+  </svg>
+);
+
+// ── Official Supabase Database icon — flat green ──────────────────────────────
+const DatabaseIcon: React.FC<{ size: number }> = ({ size }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" viewBox="0 0 115 115">
+    <rect width="113.52" height="113.52" x=".5" y=".729" fill="#1a1a1a" rx="22.19"/>
+    <path fill={GREEN} fillRule="evenodd" d="M33.834 36.973a7 7 0 0 1 7-7h32.854a7 7 0 0 1 7 7v8.341a7 7 0 0 1-4.196 6.416v11.517a7 7 0 0 1 4.196 6.416v8.341a7 7 0 0 1-7 7H40.834a7 7 0 0 1-7-7v-8.341a7 7 0 0 1 4.048-6.35v-11.65a7 7 0 0 1-4.048-6.349zm10.048 15.341v10.349h26.61V52.314zm-3.048-16.341a1 1 0 0 0-1 1v8.341a1 1 0 0 0 1 1h32.854a1 1 0 0 0 1-1v-8.341a1 1 0 0 0-1-1zm0 32.69a1 1 0 0 0-1 1v8.341a1 1 0 0 0 1 1h32.854a1 1 0 0 0 1-1v-8.341a1 1 0 0 0-1-1z" clipRule="evenodd"/>
+    <rect width="111.655" height="111.655" x="1.432" y="1.661" stroke={GREEN} strokeOpacity=".15" strokeWidth="1.864" rx="21.258"/>
+  </svg>
+);
+
+// ── Compression progress bar (shown under Edge Functions icon) ────────────────
+const CompressBar: React.FC<{ progress: number; opacity: number }> = ({ progress, opacity }) => {
+  const stage =
+    progress < 0.33 ? 'Analyzing…'
+    : progress < 0.66 ? 'Encoding…'
+    : progress < 1 ? 'Optimizing…'
+    : '↓ 85% smaller';
 
   return (
     <div style={{
-      position: 'absolute', left: 0, top: topY,
-      width: 1080, height: CONN_H,
-      pointerEvents: 'none',
+      position: 'absolute', left: 120, right: 120,
+      top: SUB3_Y + 48,
+      opacity,
+      fontFamily: FONT,
     }}>
-      {/* Step circle — left */}
       <div style={{
-        position: 'absolute', left: PX + 10, top: '50%',
-        transform: 'translateY(-50%)',
-        opacity: fadeIn,
+        height: 6, backgroundColor: 'rgba(255,255,255,0.07)',
+        borderRadius: 3, overflow: 'hidden', marginBottom: 10,
       }}>
         <div style={{
-          width: 26, height: 26, borderRadius: '50%',
-          backgroundColor: stepDone ? GREEN : 'transparent',
-          border: `2px solid ${stepDone ? GREEN : GREEN + '66'}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, color: stepDone ? '#000' : GREEN,
-          fontWeight: '800', fontFamily: 'Inter, system-ui, sans-serif',
-        }}>
-          {stepDone ? '✓' : stepNum}
-        </div>
+          height: '100%',
+          width: `${Math.round(progress * 100)}%`,
+          backgroundColor: progress >= 1 ? GREEN : 'rgba(62,207,142,0.6)',
+          borderRadius: 3,
+          boxShadow: `0 0 10px ${GREEN}66`,
+        }} />
       </div>
-
-      {/* Dashed line + downward V-chevron */}
-      <svg
-        width={20} height={CONN_H}
-        style={{ position: 'absolute', left: PMX - 10, top: 0, overflow: 'visible' }}
-      >
-        {drawn > 2 && (
-          <line
-            x1={cx} y1={lineTop}
-            x2={cx} y2={lineTip}
-            stroke={`rgba(62,207,142,${Math.min(progress * 1.4, 0.65)})`}
-            strokeWidth={2.5}
-            strokeDasharray="8 5"
-          />
-        )}
-        {drawn > 12 && (
-          <path
-            d={`M ${cx - 9} ${lineTip - 11} L ${cx} ${lineTip} L ${cx + 9} ${lineTip - 11}`}
-            fill="none"
-            stroke={`rgba(62,207,142,${Math.min(progress * 1.8, 0.8)})`}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        )}
-      </svg>
-
-      {/* Label — right */}
       <div style={{
-        position: 'absolute', right: PX + 10, top: '50%',
-        transform: 'translateY(-50%)',
-        fontSize: 12, fontWeight: '700', color: GREEN,
-        opacity: fadeIn, whiteSpace: 'nowrap', letterSpacing: '0.05em',
-        fontFamily: 'Inter, system-ui, sans-serif',
+        display: 'flex', justifyContent: 'space-between',
+        fontSize: 28, color: progress >= 1 ? GREEN : DIM, fontWeight: progress >= 1 ? 600 : 400,
+        letterSpacing: '-0.01em',
       }}>
-        {label}
+        <span>{stage}</span>
+        <span>{Math.round(progress * 100)}%</span>
       </div>
-    </div>
-  );
-};
-
-// ── Database cylinder (pure SVG) ──────────────────────────────────────────────
-const DatabaseCylinder: React.FC<{
-  contentOp: number;
-  newRowOp: number;
-  newRowSlide: number;
-  glow: boolean;
-  scale: number;
-}> = ({ contentOp, newRowOp, newRowSlide, glow, scale }) => {
-  const RX   = PW / 2;
-  const RY   = DB_RY;
-  const BODY = DB_BODY_H;
-  const SVGH = RY * 2 + BODY;
-
-  const border    = glow ? `${GREEN}55` : PANEL_BORDER;
-  const CONTENT_Y = RY * 2 + 5; // start below top ellipse
-  const ROW_H     = 44;
-  const R1Y = CONTENT_Y;
-  const R2Y = R1Y + ROW_H;
-  const R3Y = R2Y + ROW_H;
-
-  return (
-    <div style={{ position: 'absolute', left: PX, top: DB_TOP, width: PW, height: SVGH, transform: `scale(${scale})` }}>
-      <svg width={PW} height={SVGH}>
-        {/* Body */}
-        <rect x={0} y={RY} width={PW} height={BODY} fill={PANEL_BG} />
-        <line x1={0.75}      y1={RY} x2={0.75}      y2={RY + BODY} stroke={border} strokeWidth={1.5} />
-        <line x1={PW - 0.75} y1={RY} x2={PW - 0.75} y2={RY + BODY} stroke={border} strokeWidth={1.5} />
-
-        {/* Row dividers */}
-        <line x1={16} y1={R2Y} x2={PW - 16} y2={R2Y} stroke={PANEL_BORDER} strokeWidth={1} opacity={contentOp} />
-        <line x1={16} y1={R3Y} x2={PW - 16} y2={R3Y} stroke={PANEL_BORDER} strokeWidth={1} opacity={contentOp} />
-
-        {/* Existing rows (dim) */}
-        <g opacity={contentOp * 0.4} fontFamily="Inter, system-ui, sans-serif">
-          <text x={30}      y={R1Y + 24} fontSize={13} fill={TEXT_DIM}>1</text>
-          <text x={76}      y={R1Y + 24} fontSize={13} fill={TEXT_DIM}>banner.jpg</text>
-          <text x={PW - 24} y={R1Y + 24} fontSize={12} fill="#4a5568" textAnchor="end">2.4 MB</text>
-
-          <text x={30}      y={R2Y + 24} fontSize={13} fill={TEXT_DIM}>2</text>
-          <text x={76}      y={R2Y + 24} fontSize={13} fill={TEXT_DIM}>thumb.png</text>
-          <text x={PW - 24} y={R2Y + 24} fontSize={12} fill="#4a5568" textAnchor="end">840 KB</text>
-        </g>
-
-        {/* New row (animated) */}
-        <g
-          opacity={newRowOp}
-          transform={`translate(0, ${newRowSlide})`}
-          fontFamily="Inter, system-ui, sans-serif"
-        >
-          <rect x={0} y={R3Y} width={PW} height={ROW_H - 1} fill="rgba(62,207,142,0.09)" />
-          <rect x={0} y={R3Y} width={3}  height={ROW_H - 1} fill={GREEN} />
-          <text x={30}      y={R3Y + 24} fontSize={13} fill={GREEN} fontWeight="bold">3</text>
-          <text x={76}      y={R3Y + 24} fontSize={14} fill={TEXT_BRIGHT} fontWeight="600">demo_video.mp4</text>
-          <text x={PW - 24} y={R3Y + 24} fontSize={12} fill={GREEN} textAnchor="end">300 KB</text>
-        </g>
-
-        {/* Bottom ellipse */}
-        <ellipse
-          cx={RX} cy={RY + BODY}
-          rx={RX - 0.75} ry={RY}
-          fill="#0f1a24" stroke={border} strokeWidth={1.5}
-        />
-
-        {/* Top ellipse — drawn last */}
-        <ellipse
-          cx={RX} cy={RY}
-          rx={RX - 0.75} ry={RY}
-          fill="#1a2738" stroke={border} strokeWidth={1.5}
-        />
-
-        <text
-          x={RX} y={RY + 7}
-          textAnchor="middle"
-          fontFamily="Inter, system-ui, sans-serif"
-          fontSize={12} fontWeight="700" fill={GREEN}
-        >
-          videos
-        </text>
-      </svg>
     </div>
   );
 };
@@ -280,391 +210,89 @@ const DatabaseCylinder: React.FC<{
 export const StorageUploadFlow2: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // Entrance
-  const slideY    = itp(frame, 0, T_IN, 60, 0, easeOut);
-  const fadeIn    = itp(frame, 0, T_IN);
-  const contentOp = itp(frame, T_CONTENT, T_CONTENT + 15);
+  const fadeIn = itp(frame, 0, 22);
 
-  // ── Camera zoom: follows the active section ───────────────────────────────
-  const toStorageT    = itp(frame, T_FLOW1_S, T_FLOW1_S + 28, 0, 1, easeInOut);
-  const toCompressorT = itp(frame, T_FLOW2_S, T_FLOW2_S + 28, 0, 1, easeInOut);
-  const toDatabaseT   = itp(frame, T_FLOW3_S, T_FLOW3_S + 28, 0, 1, easeInOut);
+  // User
+  const userSp = spring({ frame: frame - T_USER, fps: 30, config: { damping: 14, stiffness: 140, mass: 0.9 } });
+  const userSc = frame < T_USER ? 0 : Math.min(userSp, 1);
+  const userOp = itp(frame, T_USER, T_USER + 14);
 
-  const cameraScale = 1.0 + 0.05 * toStorageT + 0.03 * toCompressorT + 0.03 * toDatabaseT;
-  const cameraY     = STOR_CAM_Y * toStorageT
-                    + (COMP_CAM_Y - STOR_CAM_Y) * toCompressorT
-                    + (DB_CAM_Y   - COMP_CAM_Y) * toDatabaseT;
-
-  // ── User section: spring scale-in ────────────────────────────────────────
-  const userSpring = spring({ frame: frame - T_CONTENT, fps: 30,
-    config: { damping: 14, stiffness: 150, mass: 1.0 } });
-  const userScale = frame < T_CONTENT ? 0.65 : Math.min(0.65 + 0.35 * userSpring, 1.12);
-
-  // ── Storage panel: pop scale when upload begins ───────────────────────────
-  const storagePop = frame < T_FLOW1_S ? 1
-    : frame < T_FLOW1_S + 10 ? itp(frame, T_FLOW1_S, T_FLOW1_S + 10, 1, 1.06, easeOut)
-    : itp(frame, T_FLOW1_S + 10, T_FLOW1_S + 28, 1.06, 1.0, easeInOut);
-
-  // ── Compressor panel: pop when active ────────────────────────────────────
-  const compPop = frame < T_COMP_IN ? 1
-    : frame < T_COMP_IN + 10 ? itp(frame, T_COMP_IN, T_COMP_IN + 10, 1, 1.06, easeOut)
-    : itp(frame, T_COMP_IN + 10, T_COMP_IN + 28, 1.06, 1.0, easeInOut);
-
-  // ── DB cylinder: punch scale when row arrives ─────────────────────────────
-  const dbPop = frame < T_DB_ROW ? 1
-    : frame < T_DB_ROW + 10 ? itp(frame, T_DB_ROW, T_DB_ROW + 10, 1, 1.07, easeOut)
-    : itp(frame, T_DB_ROW + 10, T_DB_ROW + 28, 1.07, 1.0, easeInOut);
-
-  // File card
-  const fileOp     = itp(frame, T_FILE, T_FILE + 14);
-  const fileScale  = itp(frame, T_FILE, T_FILE + 14, 0.7, 1, easeOut);
-  const fileSendOp = frame >= T_SEND ? itp(frame, T_SEND, T_SEND + 16, 1, 0) : 1;
-  const fileSendY  = frame >= T_SEND ? itp(frame, T_SEND, T_SEND + 16, 0, -18, easeOut) : 0;
-
-  // Connector 1 (user → storage)
-  const arrow1  = itp(frame, T_FLOW1_S, T_FLOW1_S + 22, 0, 1, easeInOut);
-  const p1cycle = frame >= T_FLOW1_S && frame < T_FLOW1_E
-    ? ((frame - T_FLOW1_S) % 36) / 36 : -1;
+  // Arrow 1
+  const arr1Op = itp(frame, T_ARR1, T_ARR1 + 35, 0, 1, easeOut);
 
   // Storage
-  const storedOp    = itp(frame, T_STORED, T_STORED + 14);
-  const storedSlide = itp(frame, T_STORED, T_STORED + 14, 12, 0, easeOut);
+  const storSp = spring({ frame: frame - T_STOR, fps: 30, config: { damping: 12, stiffness: 130, mass: 1.0 } });
+  const storSc = frame < T_STOR ? 0 : Math.min(storSp, 1.05);
+  const storOp = itp(frame, T_STOR, T_STOR + 14);
 
-  // Connector 2 (storage → compressor)
-  const arrow2  = itp(frame, T_FLOW2_S, T_FLOW2_S + 22, 0, 1, easeInOut);
-  const p2cycle = frame >= T_FLOW2_S && frame < T_FLOW2_E
-    ? ((frame - T_FLOW2_S) % 36) / 36 : -1;
+  // Arrow 2
+  const arr2Op = itp(frame, T_ARR2, T_ARR2 + 35, 0, 1, easeOut);
 
-  // Compressor panel
-  const compInOp    = itp(frame, T_COMP_IN, T_COMP_IN + 14);
-  const compInSlide = itp(frame, T_COMP_IN, T_COMP_IN + 14, 10, 0, easeOut);
-  const compressProgress = itp(frame, T_COMPRESS_S, T_COMPRESS_E, 0, 1, easeInOut);
-  const compOutOp   = itp(frame, T_COMP_OUT, T_COMP_OUT + 14);
-  const compOutSlide = itp(frame, T_COMP_OUT, T_COMP_OUT + 14, 10, 0, easeOut);
+  // Edge Functions / Compressor
+  const compSp = spring({ frame: frame - T_COMP, fps: 30, config: { damping: 12, stiffness: 130, mass: 1.0 } });
+  const compSc = frame < T_COMP ? 0 : Math.min(compSp, 1.05);
+  const compOp = itp(frame, T_COMP, T_COMP + 14);
+  const compressProgress = itp(frame, T_COMPRESS_S, T_COMPRESS_E, 0, 1);
+  const barOp  = itp(frame, T_COMPRESS_S, T_COMPRESS_S + 14);
 
-  const compressStage =
-    compressProgress < 0.33 ? 'Analyzing…'
-    : compressProgress < 0.66 ? 'Encoding…'
-    : compressProgress < 1 ? 'Optimizing…'
-    : 'Done';
+  // Arrow 3
+  const arr3Op = itp(frame, T_ARR3, T_ARR3 + 35, 0, 1, easeOut);
 
-  // Connector 3 (compressor → database)
-  const arrow3  = itp(frame, T_FLOW3_S, T_FLOW3_S + 22, 0, 1, easeInOut);
-  const p3cycle = frame >= T_FLOW3_S && frame < T_FLOW3_E
-    ? ((frame - T_FLOW3_S) % 36) / 36 : -1;
-
-  // DB row
-  const dbOp    = itp(frame, T_DB_ROW, T_DB_ROW + 14);
-  const dbSlide = itp(frame, T_DB_ROW, T_DB_ROW + 14, 12, 0, easeOut);
-
-  const step1Done    = frame >= T_STORED;
-  const step2Done    = frame >= T_COMP_OUT;
-  const step3Done    = frame >= T_DB_ROW;
-  const storageGlow  = frame >= T_FLOW1_S;
-  const compGlow     = frame >= T_COMP_IN;
-  const dbGlow       = frame >= T_DB_ROW;
+  // Database
+  const dbSp = spring({ frame: frame - T_DB, fps: 30, config: { damping: 12, stiffness: 130, mass: 1.0 } });
+  const dbSc = frame < T_DB ? 0 : Math.min(dbSp, 1.05);
+  const dbOp = itp(frame, T_DB, T_DB + 14);
 
   return (
-    <AbsoluteFill style={{
-      backgroundColor: BG,
-      fontFamily: 'Inter, system-ui, sans-serif',
-      overflow: 'hidden',
-    }}>
-      {/* Background glow */}
+    <AbsoluteFill style={{ backgroundColor: BG, overflow: 'hidden' }}>
+
       <div style={{
         position: 'absolute', inset: 0,
-        background: `radial-gradient(ellipse at 50% 45%, rgba(62,207,142,0.08) 0%, transparent 60%)`,
-        pointerEvents: 'none',
+        background: `radial-gradient(ellipse 80% 60% at 50% 50%, rgba(62,207,142,0.05) 0%, transparent 70%)`,
+        pointerEvents: 'none', opacity: fadeIn,
       }} />
 
-      {/* ── Camera wrapper — zooms into each section as the story progresses ── */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        transform: `scale(${cameraScale}) translateY(${cameraY}px)`,
-      }}>
+      {/* Arrows */}
+      <VArrow y1={P1_TOP} y2={P1_BOT} progress={arr1Op} />
+      <VArrow y1={P2_TOP} y2={P2_BOT} progress={arr2Op} />
+      <VArrow y1={P3_TOP} y2={P3_BOT} progress={arr3Op} />
 
-      {/* ── Single sliding container ── */}
-      <div style={{
-        position: 'absolute', left: 0, top: 0, width: 1080, height: 1920,
-        transform: `translateY(${slideY}px)`,
-        opacity: fadeIn,
-      }}>
+      {/* Section 1: User */}
+      <Icon cy={ICON1_CY} scale={userSc} opacity={userOp} glow={false}>
+        <AuthIcon size={ICON_SIZE} />
+      </Icon>
+      <Lbl y={LBL1_Y} text="User" size={46} weight={700} color={BRIGHT} opacity={userOp} />
+      <Lbl y={SUB1_Y} text="demo_video.mp4  ·  3 MB" size={30} weight={400} color={DIM} opacity={userOp} />
 
-        {/* ── USER SECTION ──────────────────────────────────── */}
-        <div style={{
-          position: 'absolute',
-          left: PX, top: USER_TOP,
-          width: PW,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', gap: 12,
-          opacity: contentOp,
-          transform: `scale(${userScale})`,
-        }}>
-          <svg width={72} height={80} viewBox="0 0 72 80">
-            <circle cx={36} cy={24} r={20} fill="none" stroke={GREEN} strokeWidth={2.5} />
-            <path d="M 4 76 C 4 52 68 52 68 76" fill={`${GREEN}20`} stroke={GREEN} strokeWidth={2.5} />
-          </svg>
+      {/* Section 2: Storage */}
+      <Icon cy={ICON2_CY} scale={storSc} opacity={storOp} glow={frame >= T_STOR + 20}>
+        <StorageIcon size={ICON_SIZE} />
+      </Icon>
+      <Lbl y={LBL2_Y} text="Storage" size={46} weight={700} color={BRIGHT} opacity={storOp} />
+      <Lbl y={SUB2_Y} text="Supabase Storage" size={30} weight={400} color={DIM} opacity={storOp} />
 
-          <div style={{ transform: `translateY(${fileSendY}px)`, opacity: fileOp * fileSendOp }}>
-            <div style={{
-              transform: `scale(${fileScale})`,
-              backgroundColor: 'rgba(62,207,142,0.08)',
-              border: `1px solid ${GREEN}55`,
-              borderRadius: 10,
-              padding: '8px 18px',
-              display: 'flex', alignItems: 'center', gap: 10,
-              whiteSpace: 'nowrap',
-            }}>
-              <span style={{ fontSize: 20 }}>🎬</span>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: '600', color: TEXT_BRIGHT }}>demo_video.mp4</div>
-                <div style={{ fontSize: 11, color: TEXT_DIM }}>3 MB</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Section 3: Edge Functions */}
+      <Icon cy={ICON3_CY} scale={compSc} opacity={compOp} glow={frame >= T_COMP + 20}>
+        <EdgeFunctionsIcon size={ICON_SIZE} />
+      </Icon>
+      <Lbl y={LBL3_Y} text="Edge Functions" size={46} weight={700} color={BRIGHT} opacity={compOp} />
+      <Lbl y={SUB3_Y} text="compress video" size={30} weight={400} color={DIM} opacity={compOp} />
+      <CompressBar progress={compressProgress} opacity={barOp} />
 
-        {/* ── CONNECTOR 1: user → storage ───────────────────── */}
-        {arrow1 > 0 && (
-          <VConnector
-            topY={CONN1_TOP}
-            label="HTTP Upload"
-            stepNum={1}
-            progress={arrow1}
-            stepDone={step1Done}
-          />
-        )}
-        <VParticles y1={CONN1_TOP + 10} y2={STOR_TOP - 12} cycle={p1cycle} />
-
-        {/* ── STORAGE PANEL ─────────────────────────────────── */}
-        <div style={{
-          position: 'absolute', left: PX, top: STOR_TOP,
-          width: PW, height: STOR_H,
-          backgroundColor: PANEL_BG,
-          borderRadius: 16,
-          border: `1px solid ${storageGlow ? GREEN + '55' : PANEL_BORDER}`,
-          overflow: 'hidden',
-          boxShadow: storageGlow ? `0 0 40px ${GREEN}18` : '0 4px 28px rgba(0,0,0,0.3)',
-          transform: `scale(${storagePop})`,
-        }}>
-          <div style={{
-            backgroundColor: '#0d1117',
-            padding: '13px 20px',
-            borderBottom: `1px solid ${PANEL_BORDER}`,
-            display: 'flex', alignItems: 'center', gap: 10,
-          }}>
-            <SupabaseLogo size={22} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: TEXT_DIM, fontSize: 14 }}>Storage</span>
-              <span style={{ color: '#4a5568', fontSize: 14 }}>/</span>
-              <span style={{ color: TEXT_BRIGHT, fontSize: 14, fontWeight: '600' }}>uploads</span>
-            </div>
-          </div>
-
-          <div style={{
-            padding: '9px 20px',
-            display: 'grid', gridTemplateColumns: '1fr 88px',
-            borderBottom: `1px solid ${PANEL_BORDER}`,
-            opacity: contentOp,
-          }}>
-            <span style={{ fontSize: 11, color: '#4a5568', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Name</span>
-            <span style={{ fontSize: 11, color: '#4a5568', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Size</span>
-          </div>
-
-          <div style={{ opacity: contentOp * 0.38 }}>
-            {[['🖼️', 'banner.jpg', '2.4 MB'], ['📄', 'thumb.png', '840 KB']].map(([icon, name, size]) => (
-              <div key={name as string} style={{
-                padding: '11px 20px',
-                display: 'grid', gridTemplateColumns: '1fr 88px', alignItems: 'center',
-                borderBottom: `1px solid ${PANEL_BORDER}`,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 18 }}>{icon}</span>
-                  <span style={{ fontSize: 13, color: TEXT_DIM }}>{name}</span>
-                </div>
-                <span style={{ fontSize: 12, color: '#4a5568' }}>{size}</span>
-              </div>
-            ))}
-          </div>
-
-          {frame >= T_STORED && (
-            <div style={{
-              padding: '11px 20px',
-              display: 'grid', gridTemplateColumns: '1fr 88px', alignItems: 'center',
-              opacity: storedOp,
-              transform: `translateY(${storedSlide}px)`,
-              backgroundColor: 'rgba(62,207,142,0.09)',
-              borderLeft: `3px solid ${GREEN}`,
-              borderBottom: `1px solid ${PANEL_BORDER}`,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 18 }}>🎬</span>
-                <span style={{ fontSize: 13, color: TEXT_BRIGHT, fontWeight: '600' }}>demo_video.mp4</span>
-              </div>
-              <span style={{ fontSize: 12, color: GREEN, fontWeight: '600' }}>3 MB</span>
-            </div>
-          )}
-        </div>
-
-        {/* ── CONNECTOR 2: storage → compressor ─────────────── */}
-        {arrow2 > 0 && (
-          <VConnector
-            topY={CONN2_TOP}
-            label="Send to Compressor"
-            stepNum={2}
-            progress={arrow2}
-            stepDone={step2Done}
-          />
-        )}
-        <VParticles y1={CONN2_TOP + 10} y2={COMP_TOP - 12} cycle={p2cycle} />
-
-        {/* ── COMPRESSOR PANEL ──────────────────────────────── */}
-        <div style={{
-          position: 'absolute', left: PX, top: COMP_TOP,
-          width: PW, height: COMP_H,
-          backgroundColor: PANEL_BG,
-          borderRadius: 16,
-          border: `1px solid ${compGlow ? GREEN + '55' : PANEL_BORDER}`,
-          overflow: 'hidden',
-          boxShadow: compGlow ? `0 0 40px ${GREEN}18` : '0 4px 28px rgba(0,0,0,0.3)',
-          transform: `scale(${compPop})`,
-        }}>
-          {/* Header */}
-          <div style={{
-            backgroundColor: '#0d1117',
-            padding: '13px 20px',
-            borderBottom: `1px solid ${PANEL_BORDER}`,
-            display: 'flex', alignItems: 'center', gap: 10,
-          }}>
-            <SupabaseLogo size={22} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: TEXT_DIM, fontSize: 14 }}>Edge Functions</span>
-              <span style={{ color: '#4a5568', fontSize: 14 }}>/</span>
-              <span style={{ color: TEXT_BRIGHT, fontSize: 14, fontWeight: '600' }}>compress</span>
-            </div>
-          </div>
-
-          <div style={{ padding: '16px 20px 0' }}>
-
-            {/* Input file */}
-            {frame >= T_COMP_IN && (
-              <div style={{
-                opacity: compInOp,
-                transform: `translateY(${compInSlide}px)`,
-                marginBottom: 14,
-              }}>
-                <div style={{ fontSize: 10, color: '#4a5568', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
-                  Input
-                </div>
-                <div style={{
-                  padding: '10px 14px',
-                  backgroundColor: 'rgba(255,255,255,0.03)',
-                  borderRadius: 8,
-                  border: `1px solid ${PANEL_BORDER}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 18 }}>🎬</span>
-                    <span style={{ fontSize: 13, color: TEXT_DIM }}>demo_video.mp4</span>
-                  </div>
-                  <span style={{ fontSize: 12, color: '#4a5568' }}>3 MB</span>
-                </div>
-              </div>
-            )}
-
-            {/* Compression progress */}
-            {frame >= T_COMPRESS_S && (
-              <div style={{ marginBottom: 14, opacity: compressProgress < 1 ? 1 : itp(frame, T_COMP_OUT, T_COMP_OUT + 10, 1, 0.4) }}>
-                <div style={{
-                  height: 6,
-                  backgroundColor: 'rgba(255,255,255,0.06)',
-                  borderRadius: 3,
-                  overflow: 'hidden',
-                  marginBottom: 6,
-                }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${compressProgress * 100}%`,
-                    backgroundColor: compressProgress >= 1 ? GREEN : '#3b82f6',
-                    borderRadius: 3,
-                    boxShadow: `0 0 8px ${compressProgress >= 1 ? GREEN : '#3b82f6'}88`,
-                  }} />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 12, color: TEXT_DIM }}>{compressStage}</span>
-                  <span style={{ fontSize: 12, color: compressProgress >= 1 ? GREEN : TEXT_DIM, fontWeight: '600' }}>
-                    {Math.round(compressProgress * 100)}%
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Output file */}
-            {frame >= T_COMP_OUT && (
-              <div style={{
-                opacity: compOutOp,
-                transform: `translateY(${compOutSlide}px)`,
-              }}>
-                <div style={{ fontSize: 10, color: '#4a5568', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
-                  Output
-                </div>
-                <div style={{
-                  padding: '10px 14px',
-                  backgroundColor: 'rgba(62,207,142,0.08)',
-                  borderRadius: 8,
-                  border: `1px solid ${GREEN}44`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 18 }}>🎬</span>
-                    <span style={{ fontSize: 13, color: TEXT_BRIGHT, fontWeight: '600' }}>demo_video.mp4</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{
-                      fontSize: 11, fontWeight: '700', color: GREEN,
-                      backgroundColor: 'rgba(62,207,142,0.12)',
-                      padding: '2px 7px', borderRadius: 4,
-                    }}>
-                      ↓ 85%
-                    </span>
-                    <span style={{ fontSize: 12, color: GREEN, fontWeight: '600' }}>300 KB</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── CONNECTOR 3: compressor → database ────────────── */}
-        {arrow3 > 0 && (
-          <VConnector
-            topY={CONN3_TOP}
-            label="Save Metadata"
-            stepNum={3}
-            progress={arrow3}
-            stepDone={step3Done}
-          />
-        )}
-        <VParticles y1={CONN3_TOP + 10} y2={DB_TOP - 12} cycle={p3cycle} />
-
-        {/* ── DATABASE CYLINDER ─────────────────────────────── */}
-        <DatabaseCylinder
-          contentOp={contentOp}
-          newRowOp={dbOp}
-          newRowSlide={dbSlide}
-          glow={dbGlow}
-          scale={dbPop}
-        />
-
-      </div>{/* end entrance slide */}
-      </div>{/* end camera wrapper */}
+      {/* Section 4: Database */}
+      <Icon cy={ICON4_CY} scale={dbSc} opacity={dbOp} glow={frame >= T_DB + 20}>
+        <DatabaseIcon size={ICON_SIZE} />
+      </Icon>
+      <Lbl y={LBL4_Y} text="Database" size={46} weight={700} color={BRIGHT} opacity={dbOp} />
+      <Lbl y={SUB4_Y} text="Postgres" size={30} weight={400} color={DIM} opacity={dbOp} />
 
       {/* Bottom accent */}
       <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, height: '4px',
-        background: `linear-gradient(90deg, transparent, ${GREEN}77, transparent)`,
+        position: 'absolute', bottom: 0, left: 0, right: 0, height: 4,
+        background: `linear-gradient(90deg, transparent, ${GREEN}66, transparent)`,
         opacity: fadeIn * 0.8,
       }} />
+
     </AbsoluteFill>
   );
 };

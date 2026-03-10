@@ -30,6 +30,7 @@ import { CursorConnecter } from "./CursorConnecter";
 import { CleanCode } from "./CleanCode";
 import { InstaTemplate } from "./InstaTemplate";
 import { ConstraintsDoc } from "./ConstraintsDoc";
+import { Libraries } from "./Libraries";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -273,6 +274,14 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      <Composition
+        id="Libraries"
+        component={Libraries}
+        durationInFrames={400}
+        fps={30}
+        width={1920}
+        height={1080}
       />
     </>
   );
