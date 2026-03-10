@@ -278,7 +278,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="Libraries"
         component={Libraries}
-        durationInFrames={400}
+        durationInFrames={700}
         fps={30}
         width={1920}
         height={1080}

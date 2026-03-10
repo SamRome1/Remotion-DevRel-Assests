@@ -39,7 +39,26 @@ const T_INSTALL2_E = 336;
 const T_BIC        = 346;  // browser-image-compression logo pops in
 const T_CONN2      = 360;  // connection line
 
-const TOTAL = 400;
+// ── Upload section ────────────────────────────────────────────────────────────
+const T_FADE_OUT   = 390;  // library section fades out
+const T_FADE_OUT_E = 415;
+const T_BUCKET_IN  = 408;  // bucket zooms in
+const T_FILE_IN    = 428;  // compressed file card appears
+const T_FLY_S      = 452;  // file starts flying into bucket
+const T_FLY_E      = 492;  // file reaches bucket
+const T_PROGRESS_S = 488;
+const T_PROGRESS_E = 528;
+const T_SUCCESS    = 532;
+
+const TOTAL = 560;
+
+// ── Comparison section ────────────────────────────────────────────────────────
+const T_COMP_FADE_IN  = 548;
+const T_BEFORE_IN     = 562;
+const T_ARROW_S       = 585;
+const T_ARROW_E       = 614;
+const T_AFTER_IN      = 618;
+const T_FINAL_SUCCESS = 648;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function easeOut(t: number) { return 1 - (1 - t) ** 3; }
@@ -327,6 +346,66 @@ const TerminalPanel: React.FC<{
   </div>
 );
 
+// ── Supabase Storage bucket icon (flat green, official path) ──────────────
+const StorageBucketIcon: React.FC<{ size: number }> = ({ size }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" viewBox="0 0 114 115">
+    <rect width="113.52" height="113.52" x=".348" y=".729" fill="#1a1a1a" rx="22.19"/>
+    <path fill={GREEN} fillRule="evenodd" d="M41.617 34.565a3 3 0 0 0-3 3v8.281h2.541a9 9 0 0 1 6.312 2.585l3.124 3.073a3 3 0 0 0 2.104.862h23.125v-2.314H64.185a4 4 0 0 1-4-4V34.565zm38.208 9.397a9 9 0 0 0-.653-.724l-12.11-12.052a9 9 0 0 0-6.348-2.62H41.617a9 9 0 0 0-9 9v9.523a9 9 0 0 0-4.433 7.757v22.565a9 9 0 0 0 9 9h39.848a9 9 0 0 0 9-9V61.366c0-3.21-1.68-6.027-4.209-7.62v-4.128a9 9 0 0 0-1.136-4.379 3.6 3.6 0 0 0-.808-1.223zm-13.64-5.155v5.245h5.244zM37.183 51.846a3 3 0 0 0-3 3v22.565a3 3 0 0 0 3 3h39.848a3 3 0 0 0 3-3V61.366a3 3 0 0 0-3-3H52.698a9 9 0 0 1-6.312-2.585l-3.124-3.073a3 3 0 0 0-2.104-.862z" clipRule="evenodd"/>
+    <rect width="111.655" height="111.655" x="1.28" y="1.661" stroke={GREEN} strokeOpacity=".15" strokeWidth="1.864" rx="21.258"/>
+  </svg>
+);
+
+// ── Supabase-style video file icon ────────────────────────────────────────
+const VideoFileIcon: React.FC<{ size: number; dimmed?: boolean }> = ({ size, dimmed }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} fill="none" viewBox="0 0 114 115">
+    <rect width="113.52" height="113.52" x=".348" y=".729" fill="#1a1a1a" rx="22.19"/>
+    {/* Document body */}
+    <path fill={dimmed ? 'rgba(62,207,142,0.45)' : GREEN} fillRule="evenodd"
+      d="M38 28.729h24a6 6 0 0 1 4.243 1.757l12 12A6 6 0 0 1 80 46.729v40a6 6 0 0 1-6 6H38a6 6 0 0 1-6-6v-52a6 6 0 0 1 6-6zm24 4v12a2 2 0 0 0 2 2h12L62 32.729z"
+      clipRule="evenodd"
+    />
+    {/* Play triangle */}
+    <path fill={dimmed ? 'rgba(62,207,142,0.45)' : GREEN} d="M49 58.729l16 9-16 9v-18z"/>
+    <rect width="111.655" height="111.655" x="1.28" y="1.661" stroke={dimmed ? 'rgba(62,207,142,0.3)' : GREEN} strokeOpacity=".15" strokeWidth="1.864" rx="21.258"/>
+  </svg>
+);
+
+// ── Compressed file card ───────────────────────────────────────────────────
+const FileCard: React.FC<{ opacity: number; scale: number; x: number; y: number }> = ({ opacity, scale, x, y }) => (
+  <div style={{
+    position: 'absolute',
+    left: x,
+    top: y,
+    transform: `translate(-50%, -50%) scale(${scale})`,
+    opacity,
+    backgroundColor: PANEL_BG,
+    border: `1px solid ${PANEL_BOR}`,
+    borderRadius: 14,
+    padding: '18px 24px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 16,
+    width: 280,
+    pointerEvents: 'none',
+  }}>
+    <div style={{ fontSize: 32, flexShrink: 0 }}>🖼️</div>
+    <div>
+      <div style={{ fontSize: 15, fontWeight: 600, color: BRIGHT, letterSpacing: '-0.02em', fontFamily: FONT }}>
+        optimized.jpg
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
+        <span style={{ fontSize: 13, color: DIM, fontFamily: FONT }}>45 KB</span>
+        <span style={{
+          fontSize: 11, fontWeight: 700,
+          color: '#0f0f0f', backgroundColor: GREEN,
+          padding: '2px 7px', borderRadius: 10,
+          fontFamily: FONT, letterSpacing: '0.02em',
+        }}>↓ 85%</span>
+      </div>
+    </div>
+  </div>
+);
+
 // ── Main component ─────────────────────────────────────────────────────────
 export const Libraries: React.FC = () => {
   const frame = useCurrentFrame();
@@ -375,8 +454,69 @@ export const Libraries: React.FC = () => {
   // Connection line 2 (BIC → function)
   const conn2Progress = itp(frame, T_CONN2, T_CONN2 + 30, 0, 1, easeOut);
 
+  // ── Upload section ─────────────────────────────────────────────────────────
+  // Fade out library section
+  const librarySectionOp = itp(frame, T_FADE_OUT, T_FADE_OUT_E, 1, 0);
+
+  // Bucket zooms in from small
+  const bucketSp = spring({ frame: frame - T_BUCKET_IN, fps, config: { damping: 12, stiffness: 110, mass: 1.0 } });
+  const bucketScale = frame < T_BUCKET_IN ? 0 : Math.min(bucketSp, 1);
+  const bucketOp = itp(frame, T_BUCKET_IN, T_BUCKET_IN + 20);
+
+  // File card appears
+  const fileCardOp = itp(frame, T_FILE_IN, T_FILE_IN + 16);
+  const fileCardSc = frame < T_FILE_IN ? 0 : Math.min(
+    spring({ frame: frame - T_FILE_IN, fps, config: { damping: 13, stiffness: 120, mass: 0.8 } }), 1
+  );
+
+  // File flies toward bucket (x: 380 → 960 center, arc up then down)
+  const flyProgress = itp(frame, T_FLY_S, T_FLY_E, 0, 1, easeInOut);
+  const flyX = interpolate(flyProgress, [0, 1], [380, 960]);
+  const flyY = interpolate(flyProgress, [0, 0.5, 1], [540, 440, 480]); // arc up then down
+  const flyScale = interpolate(flyProgress, [0, 0.8, 1], [1, 0.9, 0.4]);
+  const flyOp = interpolate(flyProgress, [0, 0.85, 1], [1, 1, 0]);
+
+  // Bucket glow pulse on receipt
+  const bucketReceived = frame >= T_FLY_E;
+  const bucketGlowPulse = bucketReceived
+    ? 0.35 + 0.15 * Math.sin((frame - T_FLY_E) * 0.2)
+    : 0;
+
+  // Upload progress bar
+  const uploadProgress = itp(frame, T_PROGRESS_S, T_PROGRESS_E, 0, 1, easeInOut);
+  const uploadBarOp = itp(frame, T_PROGRESS_S - 5, T_PROGRESS_S + 10);
+
+  // Success badge
+  const successSp = spring({ frame: frame - T_SUCCESS, fps, config: { damping: 10, stiffness: 140, mass: 0.6 } });
+  const successScale = frame < T_SUCCESS ? 0 : Math.min(successSp, 1);
+  const successOp = itp(frame, T_SUCCESS, T_SUCCESS + 12);
+
+  // ── Comparison section ──────────────────────────────────────────────────────
+  const compSectionOp   = itp(frame, T_COMP_FADE_IN, T_COMP_FADE_IN + 18);
+  const uploadSectionOp2 = itp(frame, T_COMP_FADE_IN, T_COMP_FADE_IN + 16, 1, 0);
+
+  // Before card (3 MB)
+  const beforeSp = spring({ frame: frame - T_BEFORE_IN, fps, config: { damping: 13, stiffness: 120, mass: 0.9 } });
+  const beforeScale = frame < T_BEFORE_IN ? 0 : Math.min(beforeSp, 1);
+  const beforeOp = itp(frame, T_BEFORE_IN, T_BEFORE_IN + 16);
+
+  // Compression arrow progress
+  const arrowProgress = itp(frame, T_ARROW_S, T_ARROW_E, 0, 1, easeOut);
+
+  // After card (300 KB)
+  const afterSp = spring({ frame: frame - T_AFTER_IN, fps, config: { damping: 11, stiffness: 130, mass: 0.7 } });
+  const afterScale = frame < T_AFTER_IN ? 0 : Math.min(afterSp, 1);
+  const afterOp = itp(frame, T_AFTER_IN, T_AFTER_IN + 14);
+
+  // Final badge
+  const finalSp = spring({ frame: frame - T_FINAL_SUCCESS, fps, config: { damping: 10, stiffness: 140, mass: 0.6 } });
+  const finalScale = frame < T_FINAL_SUCCESS ? 0 : Math.min(finalSp, 1);
+  const finalOp = itp(frame, T_FINAL_SUCCESS, T_FINAL_SUCCESS + 12);
+
   // Background glow
-  const bgGlow = 0.04 + 0.02 * Math.sin(frame * 0.05);
+  const bgGlow = frame >= T_FADE_OUT
+    ? 0.06 + 0.03 * Math.sin(frame * 0.06) + bucketGlowPulse * 0.4
+    : 0.04 + 0.02 * Math.sin(frame * 0.05);
 
   // Layout anchor points (approximate pixel positions in 1920×1080)
   const SHARP_CX      = 550;  // sharp logo horizontal center
@@ -399,127 +539,276 @@ export const Libraries: React.FC = () => {
         pointerEvents: 'none',
       }} />
 
-      {/* Connection lines (rendered behind panels) */}
-      {conn1Progress > 0 && (
-        <ConnectLine
-          startX={SHARP_CX}  startY={SHARP_TOP}
-          endX={FUNC_LEFT_X} endY={FUNC_SIDE_Y}
-          progress={conn1Progress}
-          color="rgba(255,255,255,0.5)"
-        />
-      )}
-      {conn2Progress > 0 && (
-        <ConnectLine
-          startX={BIC_CX}     startY={BIC_TOP}
-          endX={FUNC_RIGHT_X} endY={FUNC_SIDE_Y}
-          progress={conn2Progress}
-          color="#4f9cf9"
-        />
-      )}
+      {/* ── Library section (fades out) ── */}
+      <div style={{ opacity: librarySectionOp, position: 'absolute', inset: 0 }}>
 
-      {/* ── Main layout ── */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 60,
-        padding: '0 120px',
-      }}>
-
-        {/* Left: Sharp logo */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 16,
-          opacity: sharpOp,
-          transform: `scale(${sharpScale})`,
-          flexShrink: 0,
-        }}>
-          <SharpLogo size={128} />
-          <div style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: BRIGHT,
-            letterSpacing: '-0.01em',
-            fontFamily: FONT,
-          }}>
-            sharp
-          </div>
-          <div style={{
-            fontSize: 13,
-            color: DIM,
-            fontFamily: FONT,
-            letterSpacing: '-0.01em',
-          }}>
-            Node.js
-          </div>
-        </div>
-
-        {/* Center: Edge function + terminal */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 28,
-          flexShrink: 0,
-        }}>
-          <EdgeFunctionPanel opacity={funcOp} scale={funcScale} />
-          <TerminalPanel
-            slideY={termSlideY}
-            opacity={termOp}
-            typed1={typed1}
-            install1Progress={install1Progress}
-            install1Done={install1Done}
-            typed2={typed2}
-            install2Progress={install2Progress}
-            install2Done={install2Done}
-            showPrompt2={showPrompt2}
-            cursorVisible={cursorVisible}
+        {/* Connection lines */}
+        {conn1Progress > 0 && (
+          <ConnectLine
+            startX={SHARP_CX}  startY={SHARP_TOP}
+            endX={FUNC_LEFT_X} endY={FUNC_SIDE_Y}
+            progress={conn1Progress}
+            color="rgba(255,255,255,0.5)"
           />
-        </div>
+        )}
+        {conn2Progress > 0 && (
+          <ConnectLine
+            startX={BIC_CX}     startY={BIC_TOP}
+            endX={FUNC_RIGHT_X} endY={FUNC_SIDE_Y}
+            progress={conn2Progress}
+            color="#4f9cf9"
+          />
+        )}
 
-        {/* Right: BIC logo */}
+        {/* Main layout */}
         <div style={{
+          position: 'absolute', inset: 0,
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
-          gap: 16,
-          opacity: bicOp,
-          transform: `scale(${bicScale})`,
-          flexShrink: 0,
+          justifyContent: 'center',
+          gap: 60,
+          padding: '0 120px',
         }}>
-          <BICLogo size={128} />
+          {/* Left: Sharp logo */}
           <div style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: '#4f9cf9',
-            letterSpacing: '0.01em',
-            fontFamily: FONT,
-            textAlign: 'center',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+            opacity: sharpOp, transform: `scale(${sharpScale})`, flexShrink: 0,
           }}>
-            browser-image
+            <SharpLogo size={128} />
+            <div style={{ fontSize: 15, fontWeight: 600, color: BRIGHT, letterSpacing: '-0.01em', fontFamily: FONT }}>sharp</div>
+            <div style={{ fontSize: 13, color: DIM, fontFamily: FONT, letterSpacing: '-0.01em' }}>Node.js</div>
           </div>
-          <div style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: '#4f9cf9',
-            letterSpacing: '0.01em',
-            fontFamily: FONT,
-          }}>
-            compression
+
+          {/* Center: Edge function + terminal */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, flexShrink: 0 }}>
+            <EdgeFunctionPanel opacity={funcOp} scale={funcScale} />
+            <TerminalPanel
+              slideY={termSlideY} opacity={termOp}
+              typed1={typed1} install1Progress={install1Progress} install1Done={install1Done}
+              typed2={typed2} install2Progress={install2Progress} install2Done={install2Done}
+              showPrompt2={showPrompt2} cursorVisible={cursorVisible}
+            />
           </div>
+
+          {/* Right: BIC logo */}
           <div style={{
-            fontSize: 13,
-            color: DIM,
-            fontFamily: FONT,
-            letterSpacing: '-0.01em',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16,
+            opacity: bicOp, transform: `scale(${bicScale})`, flexShrink: 0,
           }}>
-            Browser
+            <BICLogo size={128} />
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#4f9cf9', letterSpacing: '0.01em', fontFamily: FONT, textAlign: 'center' }}>
+              browser-image
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#4f9cf9', letterSpacing: '0.01em', fontFamily: FONT }}>
+              compression
+            </div>
+            <div style={{ fontSize: 13, color: DIM, fontFamily: FONT, letterSpacing: '-0.01em' }}>Browser</div>
           </div>
         </div>
-      </div>
+      </div>{/* end library section */}
+
+      {/* ── Upload section ── */}
+      {frame >= T_BUCKET_IN && (
+        <div style={{ position: 'absolute', inset: 0, opacity: frame >= T_COMP_FADE_IN ? uploadSectionOp2 : 1 }}>
+
+          {/* Bucket — centered */}
+          <div style={{
+            position: 'absolute',
+            left: 960, top: 480,
+            transform: `translate(-50%, -50%) scale(${bucketScale})`,
+            opacity: bucketOp,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 20,
+          }}>
+            <div style={{
+              filter: bucketReceived ? `drop-shadow(0 0 40px ${GREEN}99)` : undefined,
+              transition: 'filter 0.1s',
+            }}>
+              <StorageBucketIcon size={180} />
+            </div>
+            <div style={{ fontSize: 15, color: DIM, fontFamily: FONT, letterSpacing: '-0.01em' }}>
+              <span style={{ color: BRIGHT, fontWeight: 600 }}>videos/</span> bucket
+            </div>
+
+            {/* Upload progress bar */}
+            {uploadBarOp > 0 && (
+              <div style={{ opacity: uploadBarOp, width: 220 }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  fontSize: 12, color: DIM, fontFamily: FONT, marginBottom: 6,
+                }}>
+                  <span>Uploading…</span>
+                  <span style={{ color: uploadProgress >= 1 ? GREEN : DIM }}>
+                    {Math.round(uploadProgress * 100)}%
+                  </span>
+                </div>
+                <div style={{
+                  height: 4, backgroundColor: 'rgba(255,255,255,0.06)',
+                  borderRadius: 2, overflow: 'hidden',
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${uploadProgress * 100}%`,
+                    backgroundColor: GREEN,
+                    borderRadius: 2,
+                    boxShadow: `0 0 8px ${GREEN}88`,
+                  }} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Compressed file card — starts left, flies right into bucket */}
+          {frame >= T_FILE_IN && (
+            <FileCard
+              opacity={frame >= T_FLY_S ? flyOp : fileCardOp}
+              scale={frame >= T_FLY_S ? flyScale : fileCardSc}
+              x={frame >= T_FLY_S ? flyX : 380}
+              y={frame >= T_FLY_S ? flyY : 540}
+            />
+          )}
+
+          {/* Success badge */}
+          {frame >= T_SUCCESS && (
+            <div style={{
+              position: 'absolute',
+              left: 960, top: 820,
+              transform: `translate(-50%, -50%) scale(${successScale})`,
+              opacity: successOp,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              backgroundColor: 'rgba(62,207,142,0.1)',
+              border: `1.5px solid ${GREEN}`,
+              borderRadius: 16,
+              padding: '14px 36px',
+              boxShadow: `0 0 40px rgba(62,207,142,0.2)`,
+            }}>
+              <span style={{ fontSize: 28 }}>✓</span>
+              <span style={{
+                fontSize: 24, fontWeight: 700, color: GREEN,
+                letterSpacing: '-0.02em', fontFamily: FONT,
+              }}>
+                Uploaded to Storage
+              </span>
+            </div>
+          )}
+
+        </div>
+      )}{/* end upload section */}
+
+      {/* ── Comparison section ── */}
+      {frame >= T_COMP_FADE_IN && (
+        <div style={{ position: 'absolute', inset: 0, opacity: compSectionOp }}>
+
+          {/* Centered row: before | arrow | after */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48,
+          }}>
+
+            {/* Before card — 3 MB */}
+            <div style={{
+              opacity: beforeOp,
+              transform: `scale(${beforeScale})`,
+              backgroundColor: PANEL_BG,
+              border: `1px solid rgba(239,68,68,0.25)`,
+              borderRadius: 20,
+              padding: '32px 36px',
+              width: 340,
+              flexShrink: 0,
+            }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FONT, marginBottom: 20 }}>Before</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                <VideoFileIcon size={72} dimmed />
+                <div>
+                  <div style={{ fontSize: 17, fontWeight: 600, color: BRIGHT, letterSpacing: '-0.02em', fontFamily: FONT }}>raw.jpg</div>
+                  <div style={{ fontSize: 42, fontWeight: 800, color: '#ef4444', letterSpacing: '-0.04em', fontFamily: FONT, lineHeight: 1.1, marginTop: 6 }}>3 MB</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Arrow + compress() label */}
+            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              {arrowProgress > 0.45 && (
+                <div style={{
+                  fontSize: 14, fontWeight: 600, color: GREEN,
+                  fontFamily: FONT, letterSpacing: '-0.01em',
+                  opacity: Math.min((arrowProgress - 0.45) / 0.2, 1),
+                }}>
+                  compress()
+                </div>
+              )}
+              <svg width={160} height={20} style={{ overflow: 'visible' }}>
+                <line
+                  x1={0} y1={10}
+                  x2={arrowProgress * 140} y2={10}
+                  stroke={GREEN} strokeWidth={2.5} strokeOpacity={0.55}
+                  strokeDasharray="10 6" strokeLinecap="round"
+                />
+                {arrowProgress > 0.88 && (
+                  <path
+                    d={`M 128 2 L 144 10 L 128 18`}
+                    fill="none" stroke={GREEN}
+                    strokeOpacity={(arrowProgress - 0.88) / 0.12}
+                    strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"
+                  />
+                )}
+              </svg>
+            </div>
+
+            {/* After card — 300 KB */}
+            <div style={{
+              opacity: afterOp,
+              transform: `scale(${afterScale})`,
+              backgroundColor: PANEL_BG,
+              border: `1px solid rgba(62,207,142,0.25)`,
+              borderRadius: 20,
+              padding: '32px 36px',
+              width: 340,
+              flexShrink: 0,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: GREEN, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: FONT }}>After</div>
+                <div style={{
+                  fontSize: 11, fontWeight: 700,
+                  color: '#0f0f0f', backgroundColor: GREEN,
+                  padding: '3px 10px', borderRadius: 10,
+                  fontFamily: FONT, letterSpacing: '0.02em',
+                }}>↓ 90%</div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                <VideoFileIcon size={72} />
+                <div>
+                  <div style={{ fontSize: 17, fontWeight: 600, color: BRIGHT, letterSpacing: '-0.02em', fontFamily: FONT }}>optimized.jpg</div>
+                  <div style={{ fontSize: 42, fontWeight: 800, color: GREEN, letterSpacing: '-0.04em', fontFamily: FONT, lineHeight: 1.1, marginTop: 6, textShadow: `0 0 30px ${GREEN}66` }}>300 KB</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Final badge — centered below cards */}
+          {frame >= T_FINAL_SUCCESS && (
+            <div style={{
+              position: 'absolute', left: 960, top: 780,
+              transform: `translate(-50%, -50%) scale(${finalScale})`,
+              opacity: finalOp,
+              display: 'flex', alignItems: 'center', gap: 12,
+              backgroundColor: 'rgba(62,207,142,0.08)',
+              border: `1.5px solid ${GREEN}44`,
+              borderRadius: 14, padding: '12px 30px',
+            }}>
+              <span style={{ fontSize: 18, fontWeight: 700, color: DIM, fontFamily: FONT, letterSpacing: '-0.01em' }}>
+                10× smaller before it ever hits your bucket
+              </span>
+            </div>
+          )}
+
+        </div>
+      )}{/* end comparison section */}
 
       {/* Bottom accent */}
       <div style={{
