@@ -1,15 +1,19 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, Img, staticFile } from 'remotion';
+import { loadFont, fontFamily } from '@remotion/google-fonts/Inter';
+
+loadFont('normal', { weights: ['300', '400', '500', '600', '700', '800'] });
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const GREEN  = '#3ecf8e';
 const YELLOW = '#f59e0b';
 const RED    = '#ef4444';
-const BG     = '#0d1f2d';
-const PANEL_BG     = '#1c1c1c';
-const PANEL_BORDER = 'rgba(255,255,255,0.08)';
-const TEXT_DIM     = '#718096';
-const TEXT_BRIGHT  = '#e2e8f0';
+const BG     = '#0f0f0f';
+const PANEL_BG     = '#141414';
+const PANEL_BORDER = 'rgba(255,255,255,0.07)';
+const TEXT_DIM     = 'rgba(255,255,255,0.4)';
+const TEXT_BRIGHT  = 'rgba(255,255,255,0.92)';
+const FONT         = `${fontFamily}, system-ui, sans-serif`;
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const LIMIT_MB = 1000;
@@ -61,14 +65,9 @@ function barColor(pct: number): string {
   return RED;
 }
 
-// ── Supabase bolt ─────────────────────────────────────────────────────────────
+// ── Supabase icon ─────────────────────────────────────────────────────────────
 const SupabaseLogo: React.FC<{ size?: number }> = ({ size = 28 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M11.9 1.036c-.015-.986-1.26-1.41-1.874-.637L.764 12.05C.084 12.957.712 14.25 1.86 14.25h8.238l-.107 8.714c.015.986 1.26 1.41 1.874.637l9.262-11.652c.68-.907.052-2.2-1.098-2.2h-8.238l.108-8.714z"
-      fill="#3ECF8E"
-    />
-  </svg>
+  <Img src={staticFile('SupabaseIcon.png')} style={{ width: size, height: size, objectFit: 'contain' }} />
 );
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -85,8 +84,10 @@ export const StorageLimitWarning: React.FC = () => {
   const pct    = usedMB / LIMIT_MB;
   const color  = barColor(pct);
 
-  // Zoom — scales around the usage meter (positioned at ~72% of canvas width)
   const zoomScale  = itp(frame, T_ZOOM_S, T_ZOOM_E, 1, 1.45, easeInOut);
+  // Translate left so the meter ends up centred at 960px
+  // Meter centre is ~1310px from left → needs to move 960 - 1310 = -350px
+  const zoomX      = itp(frame, T_ZOOM_S, T_ZOOM_E, 0, -350, easeInOut);
   // Fade the file browser out as we zoom in
   const browserOp  = itp(frame, T_ZOOM_S, T_ZOOM_E, 1, 0);
 
@@ -98,7 +99,7 @@ export const StorageLimitWarning: React.FC = () => {
   return (
     <AbsoluteFill style={{
       backgroundColor: BG,
-      fontFamily: 'Inter, system-ui, sans-serif',
+      fontFamily: FONT,
       overflow: 'hidden',
     }}>
       {/* Background — glow shifts color as storage fills */}
@@ -118,13 +119,14 @@ export const StorageLimitWarning: React.FC = () => {
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transform: `scale(${zoomScale})`,
-          transformOrigin: '72.4% 50%',
+          padding: '0 140px',
+          transform: `scale(${zoomScale}) translateX(${zoomX}px)`,
+          transformOrigin: '50% 50%',
         }}>
 
           {/* ── Storage Browser Panel ─────────────────────── */}
           <div style={{
-            width: 820,
+            width: 660,
             backgroundColor: PANEL_BG,
             borderRadius: 16,
             border: `1px solid ${PANEL_BORDER}`,
@@ -135,16 +137,16 @@ export const StorageLimitWarning: React.FC = () => {
           }}>
             {/* Header */}
             <div style={{
-              backgroundColor: '#161616',
+              backgroundColor: '#0f0f0f',
               padding: '18px 24px',
               borderBottom: `1px solid ${PANEL_BORDER}`,
               display: 'flex', alignItems: 'center', gap: 12,
             }}>
-              <SupabaseLogo size={30} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ color: TEXT_DIM, fontSize: 18 }}>Storage</span>
-                <span style={{ color: '#4a5568', fontSize: 18 }}>/</span>
-                <span style={{ color: TEXT_BRIGHT, fontSize: 18, fontWeight: '600' }}>videos</span>
+              <SupabaseLogo size={28} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: TEXT_DIM, fontSize: 17, fontWeight: 400 }}>Storage</span>
+                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 17 }}>/</span>
+                <span style={{ color: TEXT_BRIGHT, fontSize: 17, fontWeight: 600, letterSpacing: '-0.01em' }}>videos</span>
               </div>
             </div>
 
@@ -158,8 +160,8 @@ export const StorageLimitWarning: React.FC = () => {
             }}>
               {['Name', 'Size', 'Status'].map(h => (
                 <div key={h} style={{
-                  fontSize: 13, color: '#4a5568', fontWeight: '700',
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
+                  fontSize: 11, color: 'rgba(255,255,255,0.25)', fontWeight: 600,
+                  textTransform: 'uppercase', letterSpacing: '0.08em',
                 }}>
                   {h}
                 </div>
@@ -184,14 +186,14 @@ export const StorageLimitWarning: React.FC = () => {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <span style={{ fontSize: 22 }}>{file.icon}</span>
-                    <span style={{ color: TEXT_BRIGHT, fontSize: 16, fontWeight: '500' }}>
+                    <span style={{ fontSize: 20 }}>{file.icon}</span>
+                    <span style={{ color: TEXT_BRIGHT, fontSize: 15, fontWeight: 500, letterSpacing: '-0.01em' }}>
                       {file.name}
                     </span>
                   </div>
-                  <div style={{ color: TEXT_DIM, fontSize: 15 }}>{file.size} MB</div>
+                  <div style={{ color: TEXT_DIM, fontSize: 14 }}>{file.size} MB</div>
                   <div style={{
-                    color: GREEN, fontSize: 15, fontWeight: '600',
+                    color: GREEN, fontSize: 14, fontWeight: 600,
                     display: 'flex', alignItems: 'center', gap: 4,
                   }}>
                     ✓ Uploaded
@@ -203,7 +205,7 @@ export const StorageLimitWarning: React.FC = () => {
 
           {/* ── Storage Usage Meter ───────────────────────── */}
           <div style={{
-            width: 380,
+            width: 310,
             backgroundColor: PANEL_BG,
             borderRadius: 16,
             border: `1px solid ${pct >= 0.85 ? RED + '66' : PANEL_BORDER}`,
@@ -214,7 +216,8 @@ export const StorageLimitWarning: React.FC = () => {
               : 'none',
           }}>
             <div style={{
-              fontSize: 16, color: TEXT_DIM, fontWeight: '600', marginBottom: 20,
+              fontSize: 13, color: TEXT_DIM, fontWeight: 600,
+              textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20,
             }}>
               Storage Usage
             </div>
@@ -249,13 +252,13 @@ export const StorageLimitWarning: React.FC = () => {
                 textAlign: 'center',
               }}>
                 <div style={{
-                  fontSize: 36, fontWeight: '800',
+                  fontSize: 38, fontWeight: 800,
                   color: pct >= 0.85 ? RED : TEXT_BRIGHT,
-                  lineHeight: 1,
+                  letterSpacing: '-0.03em', lineHeight: 1,
                 }}>
                   {Math.round(usedMB)}
                 </div>
-                <div style={{ fontSize: 13, color: TEXT_DIM, marginTop: 3 }}>/ 1 GB</div>
+                <div style={{ fontSize: 13, color: TEXT_DIM, marginTop: 4, letterSpacing: '0.01em' }}>/ 1 GB</div>
               </div>
             </div>
 
@@ -278,7 +281,7 @@ export const StorageLimitWarning: React.FC = () => {
             {/* Used / free labels */}
             <div style={{
               display: 'flex', justifyContent: 'space-between',
-              fontSize: 13, color: TEXT_DIM,
+              fontSize: 12, color: TEXT_DIM, letterSpacing: '0.01em',
               marginBottom: 20,
             }}>
               <span>{Math.round(usedMB)} MB used</span>
@@ -288,16 +291,15 @@ export const StorageLimitWarning: React.FC = () => {
             {/* Tier badge */}
             <div style={{
               padding: '10px 14px',
-              backgroundColor: pct >= 0.85
-                ? `rgba(239,68,68,0.10)`
-                : 'rgba(255,255,255,0.04)',
+              backgroundColor: pct >= 0.85 ? `rgba(239,68,68,0.08)` : 'rgba(255,255,255,0.03)',
               borderRadius: 8,
               border: `1px solid ${pct >= 0.85 ? RED + '44' : PANEL_BORDER}`,
-              fontSize: 14, color: TEXT_DIM,
+              fontSize: 13, color: TEXT_DIM,
+              letterSpacing: '-0.01em',
             }}>
               <span style={{
-                color: pct >= 0.85 ? RED : '#a0aec0',
-                fontWeight: '600',
+                color: pct >= 0.85 ? RED : 'rgba(255,255,255,0.6)',
+                fontWeight: 600,
               }}>
                 Free tier
               </span>

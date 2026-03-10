@@ -1,9 +1,12 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, interpolate, spring } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, interpolate, spring, Img, staticFile } from 'remotion';
+import { loadFont, fontFamily } from '@remotion/google-fonts/Inter';
+
+loadFont('normal', { weights: ['300', '400', '600', '700'] });
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const GREEN = '#3ecf8e';
-const BG    = '#080f1a';
+const BG    = '#0f0f0f';
 
 // ── Layout (1920 × 1080) ──────────────────────────────────────────────────────
 const CX        = 960;  // horizontal center
@@ -157,14 +160,12 @@ export const SupabaseIntro: React.FC = () => {
         top:  CY - LOGO_SIZE / 2,
         width: LOGO_SIZE, height: LOGO_SIZE,
         transform: `scale(${logoScale}) rotate(${logoRotate}deg)`,
+        filter: `drop-shadow(0 0 ${glowRadius}px rgba(62,207,142,${glowOpacity}))`,
       }}>
-        <svg width={LOGO_SIZE} height={LOGO_SIZE} viewBox="0 0 24 24" fill="none">
-          <path
-            d="M11.9 1.036c-.015-.986-1.26-1.41-1.874-.637L.764 12.05C.084 12.957.712 14.25 1.86 14.25h8.238l-.107 8.714c.015.986 1.26 1.41 1.874.637l9.262-11.652c.68-.907.052-2.2-1.098-2.2h-8.238l.108-8.714z"
-            fill="url(#boltGrad)"
-            style={{ filter: `drop-shadow(0 0 ${glowRadius}px rgba(62,207,142,${glowOpacity}))` }}
-          />
-        </svg>
+        <Img
+          src={staticFile('SupabaseIcon.png')}
+          style={{ width: LOGO_SIZE, height: LOGO_SIZE, objectFit: 'contain' }}
+        />
       </div>
 
       {/* ── Flash bloom overlay ── */}
@@ -187,24 +188,25 @@ export const SupabaseIntro: React.FC = () => {
         textAlign: 'center',
         opacity: titleOp,
         transform: `translateY(${titleSlide}px)`,
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontFamily: `${fontFamily}, system-ui, -apple-system, sans-serif`,
+        lineHeight: 1.1,
       }}>
-        {/* "Optimizing" — lighter weight */}
+        {/* "Optimizing" — strong, white */}
         <span style={{
-          fontSize: 80,
-          fontWeight: 300,
-          color: '#e2e8f0',
-          letterSpacing: '-0.01em',
+          fontSize: 84,
+          fontWeight: 600,
+          color: 'rgba(255,255,255,0.92)',
+          letterSpacing: '-0.025em',
         }}>
           Optimizing{' '}
         </span>
-        {/* "Supabase" — heavy, glowing */}
+        {/* "Supabase" — brand green, slightly heavier */}
         <span style={{
-          fontSize: 80,
-          fontWeight: 800,
-          color: '#f0f4f8',
-          letterSpacing: '-0.02em',
-          textShadow: `0 0 80px rgba(62,207,142,0.3)`,
+          fontSize: 84,
+          fontWeight: 700,
+          color: GREEN,
+          letterSpacing: '-0.025em',
+          textShadow: `0 0 60px rgba(62,207,142,0.35)`,
         }}>
           Supabase
         </span>
@@ -218,11 +220,11 @@ export const SupabaseIntro: React.FC = () => {
         textAlign: 'center',
         opacity: subOp,
         transform: `translateY(${subSlide}px)`,
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-        fontSize: 36,
-        fontWeight: 400,
-        color: GREEN,
-        letterSpacing: '0.04em',
+        fontFamily: `${fontFamily}, system-ui, -apple-system, sans-serif`,
+        fontSize: 30,
+        fontWeight: 300,
+        color: 'rgba(255,255,255,0.45)',
+        letterSpacing: '0.01em',
       }}>
         for the free tier
       </div>

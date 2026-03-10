@@ -1,11 +1,16 @@
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, Img, staticFile } from 'remotion';
+import { loadFont, fontFamily } from '@remotion/google-fonts/Inter';
 
-const GREEN = '#3ecf8e';
-const DARK_BG = '#0d1f2d';
-const CARD_BG = 'rgba(255,255,255,0.04)';
-const BORDER = 'rgba(62,207,142,0.2)';
-const PRO_COST = 25;
+loadFont('normal', { weights: ['300', '400', '500', '600', '700', '800', '900'] });
+
+const GREEN        = '#3ecf8e';
+const DARK_BG      = '#0f0f0f';
+const CARD_BG      = 'rgba(255,255,255,0.04)';
+const BORDER       = 'rgba(62,207,142,0.18)';
+const DIM          = 'rgba(255,255,255,0.4)';
+const FONT         = `${fontFamily}, system-ui, sans-serif`;
+const PRO_COST     = 25;
 const PRICE_PER_USER = 5;
 
 const T_IN = 20;
@@ -101,14 +106,12 @@ export const ProTierCovered: React.FC = () => {
     easing: easeOut,
   });
 
-  // Bar color: green throughout, bright green at 100%
-  const barColor = coverageWidth >= 0.999 ? GREEN : GREEN;
 
   return (
     <AbsoluteFill
       style={{
         backgroundColor: DARK_BG,
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontFamily: FONT,
         overflow: 'hidden',
       }}
     >
@@ -157,37 +160,22 @@ export const ProTierCovered: React.FC = () => {
         >
           {/* Supabase logo mark */}
           <Img
-            src={staticFile('screenshot-supabase.png')}
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 12,
-              flexShrink: 0,
-              objectFit: 'cover',
-            }}
+            src={staticFile('SupabaseIcon.png')}
+            style={{ width: 52, height: 52, flexShrink: 0, objectFit: 'contain' }}
           />
           <div>
-            <div
-              style={{
-                fontSize: 18,
-                fontWeight: 600,
-                letterSpacing: '0.14em',
-                color: GREEN,
-                textTransform: 'uppercase',
-                marginBottom: 6,
-              }}
-            >
+            <div style={{
+              fontSize: 15, fontWeight: 600,
+              letterSpacing: '0.06em', color: GREEN,
+              textTransform: 'uppercase', marginBottom: 8,
+            }}>
               Supabase
             </div>
-            <div
-              style={{
-                fontSize: 38,
-                fontWeight: 800,
-                color: '#ffffff',
-                letterSpacing: '-0.02em',
-                lineHeight: 1,
-              }}
-            >
+            <div style={{
+              fontSize: 40, fontWeight: 800,
+              color: 'rgba(255,255,255,0.92)',
+              letterSpacing: '-0.03em', lineHeight: 1,
+            }}>
               Pro Tier
             </div>
           </div>
@@ -204,18 +192,14 @@ export const ProTierCovered: React.FC = () => {
 
           {/* Price */}
           <div style={{ textAlign: 'right' }}>
-            <div
-              style={{
-                fontSize: 58,
-                fontWeight: 900,
-                color: '#ffffff',
-                letterSpacing: '-0.03em',
-                lineHeight: 1,
-              }}
-            >
+            <div style={{
+              fontSize: 58, fontWeight: 900,
+              color: 'rgba(255,255,255,0.92)',
+              letterSpacing: '-0.04em', lineHeight: 1,
+            }}>
               $25
             </div>
-            <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>
+            <div style={{ fontSize: 18, color: DIM, marginTop: 6, letterSpacing: '0.01em' }}>
               per month
             </div>
           </div>
@@ -238,21 +222,17 @@ export const ProTierCovered: React.FC = () => {
               alignItems: 'baseline',
             }}
           >
-            <span style={{ fontSize: 22, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>
+            <span style={{ fontSize: 20, color: DIM, fontWeight: 400, letterSpacing: '0.01em' }}>
               Your revenue
             </span>
-            <span
-              style={{
-                fontSize: 34,
-                fontWeight: 800,
-                color: coverageWidth >= 1 ? GREEN : '#ffffff',
-                letterSpacing: '-0.02em',
-                transition: 'color 0.2s',
-                textShadow: coverageWidth >= 1 ? `0 0 24px ${GREEN}88` : 'none',
-              }}
-            >
+            <span style={{
+              fontSize: 34, fontWeight: 800,
+              color: coverageWidth >= 1 ? GREEN : 'rgba(255,255,255,0.92)',
+              letterSpacing: '-0.03em',
+              textShadow: coverageWidth >= 1 ? `0 0 24px ${GREEN}88` : 'none',
+            }}>
               ${Math.round(coverageWidth * PRO_COST)}{' '}
-              <span style={{ fontSize: 22, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>
+              <span style={{ fontSize: 20, fontWeight: 400, color: DIM, letterSpacing: '0em' }}>
                 / ${PRO_COST} needed
               </span>
             </span>
@@ -272,7 +252,7 @@ export const ProTierCovered: React.FC = () => {
               style={{
                 height: '100%',
                 width: `${coverageWidth * 100}%`,
-                background: `linear-gradient(90deg, #2ea370, ${GREEN})`,
+                backgroundColor: GREEN,
                 borderRadius: 9,
                 boxShadow: coverageWidth >= 1
                   ? `0 0 24px ${GREEN}88, 0 0 8px ${GREEN}44`
@@ -390,19 +370,21 @@ export const ProTierCovered: React.FC = () => {
                 </div>
 
                 {/* Name */}
-                <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>
+                <div style={{ fontSize: 18, color: DIM, fontWeight: 500, letterSpacing: '-0.01em', fontFamily: FONT }}>
                   {user.name}
                 </div>
 
                 {/* Subscription badge */}
                 <div
                   style={{
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: 700,
-                    color: '#0f1419',
+                    color: '#0f0f0f',
                     backgroundColor: GREEN,
                     padding: '4px 12px',
                     borderRadius: 20,
+                    letterSpacing: '0.01em',
+                    fontFamily: FONT,
                   }}
                 >
                   $5/mo
@@ -440,9 +422,10 @@ export const ProTierCovered: React.FC = () => {
               <span
                 style={{
                   fontSize: 52,
-                  fontWeight: 900,
+                  fontWeight: 800,
                   color: GREEN,
-                  letterSpacing: '-0.02em',
+                  letterSpacing: '-0.03em',
+                  fontFamily: FONT,
                   textShadow: `0 0 40px ${GREEN}88`,
                 }}
               >
@@ -461,13 +444,13 @@ export const ProTierCovered: React.FC = () => {
               textAlign: 'center',
             }}
           >
-            <span style={{ fontSize: 28, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}>
+            <span style={{ fontSize: 26, color: DIM, fontWeight: 400, fontFamily: FONT, letterSpacing: '-0.01em' }}>
               Just{' '}
             </span>
-            <span style={{ fontSize: 28, color: '#ffffff', fontWeight: 700 }}>
+            <span style={{ fontSize: 26, color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontFamily: FONT, letterSpacing: '-0.02em' }}>
               5 paying users at $5/mo
             </span>
-            <span style={{ fontSize: 28, color: 'rgba(255,255,255,0.5)', fontWeight: 400 }}>
+            <span style={{ fontSize: 26, color: DIM, fontWeight: 400, fontFamily: FONT, letterSpacing: '-0.01em' }}>
               {' '}covers your entire Supabase Pro plan
             </span>
           </div>
