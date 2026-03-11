@@ -10,14 +10,14 @@ import { loadFont, fontFamily as interFont } from '@remotion/google-fonts/Inter'
 import {
   GREEN,
   BG,
-  MONO,
-  FG_MUTED,
   DotGrid,
   itp,
+  iconColor,
 } from '../tokens';
 import { CodePanel } from '../Components/CodePanel';
 import type { CodeLineData } from '../Components/CodePanel';
 import { TreeNode, ConnectorLine, TravelingDot } from '../Components/TreeNode';
+import { IconDatabase, IconAuth, IconStorage, HardDrive, Link } from '../Components/Icons';
 
 loadFont('normal', { weights: ['300', '400', '500', '600', '700'] });
 
@@ -25,17 +25,19 @@ loadFont('normal', { weights: ['300', '400', '500', '600', '700'] });
 // Layout constants
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ROOT_CX = 1280;
-const ROOT_CY = 160;
-const AUTH_CX = 1280;
-const AUTH_CY = 310;
-const S3_CX   = 1140;
-const S3_CY   = 470;
-const PG_CX   = 1420;
-const PG_CY   = 470;
-const URL_CX  = 1280;
-const URL_CY  = 630;
-const NODE_H  = 72;
+// Tree centered at cx=1440 (center of right half: 960–1920)
+// Nodes fill the full right half — split pair spread to cx=1200 / cx=1680
+const ROOT_CX = 1440;
+const ROOT_CY = 170;
+const AUTH_CX = 1440;
+const AUTH_CY = 330;
+const S3_CX   = 1200;
+const S3_CY   = 500;
+const PG_CX   = 1680;
+const PG_CY   = 500;
+const URL_CX  = 1440;
+const URL_CY  = 670;
+const NODE_H  = 80;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Timeline (420 frames = 14s @ 30fps)
@@ -55,7 +57,6 @@ const NODE_H  = 72;
 //  200–220 : auth → S3 and auth → Postgres connectors draw simultaneously
 //  238–260 : S3 and Postgres glow simultaneously — key visual moment
 //  238–258 : S3 → URL and Postgres → URL connectors draw
-//  245–260 : "happens in parallel" label fades in
 //  290–312 : Public URL glows
 //  390–414 : Supabase logo fades in
 // ─────────────────────────────────────────────────────────────────────────────
@@ -86,9 +87,6 @@ export const StorageUploadExplainer: React.FC = () => {
   const dot2 = itp(frame, 205, 240); // auth → Postgres
   const dot3 = itp(frame, 243, 278); // S3 → URL
   const dot4 = itp(frame, 243, 278); // Postgres → URL
-
-  // ── "happens in parallel" label ───────────────────────────────────────────
-  const parallelOp = itp(frame, 245, 260);
 
   // ── Logo ──────────────────────────────────────────────────────────────────
   const logoOp = itp(frame, 390, 414);
@@ -167,57 +165,57 @@ export const StorageUploadExplainer: React.FC = () => {
 
         {/* 2. Auth Check → S3 (diagonal left) */}
         <ConnectorLine
-          x1={1280} y1={346}
-          x2={1140} y2={434}
+          x1={AUTH_CX} y1={AUTH_CY + NODE_H / 2}
+          x2={S3_CX}   y2={S3_CY   - NODE_H / 2}
           progress={conn1}
           litProgress={s3Glow}
           id="auth-s3"
         />
         <TravelingDot
-          x1={1280} y1={346}
-          x2={1140} y2={434}
+          x1={AUTH_CX} y1={AUTH_CY + NODE_H / 2}
+          x2={S3_CX}   y2={S3_CY   - NODE_H / 2}
           progress={dot1}
         />
 
         {/* 3. Auth Check → Postgres (diagonal right) — same frame as conn1 */}
         <ConnectorLine
-          x1={1280} y1={346}
-          x2={1420} y2={434}
+          x1={AUTH_CX} y1={AUTH_CY + NODE_H / 2}
+          x2={PG_CX}   y2={PG_CY   - NODE_H / 2}
           progress={conn2}
           litProgress={pgGlow}
           id="auth-pg"
         />
         <TravelingDot
-          x1={1280} y1={346}
-          x2={1420} y2={434}
+          x1={AUTH_CX} y1={AUTH_CY + NODE_H / 2}
+          x2={PG_CX}   y2={PG_CY   - NODE_H / 2}
           progress={dot2}
         />
 
         {/* 4. S3 → URL (diagonal right back to center) */}
         <ConnectorLine
-          x1={1140} y1={506}
-          x2={1280} y2={594}
+          x1={S3_CX}  y1={S3_CY  + NODE_H / 2}
+          x2={URL_CX} y2={URL_CY - NODE_H / 2}
           progress={conn3}
           litProgress={urlGlow}
           id="s3-url"
         />
         <TravelingDot
-          x1={1140} y1={506}
-          x2={1280} y2={594}
+          x1={S3_CX}  y1={S3_CY  + NODE_H / 2}
+          x2={URL_CX} y2={URL_CY - NODE_H / 2}
           progress={dot3}
         />
 
         {/* 5. Postgres → URL (diagonal left back to center) — same frame as conn3 */}
         <ConnectorLine
-          x1={1420} y1={506}
-          x2={1280} y2={594}
+          x1={PG_CX}  y1={PG_CY  + NODE_H / 2}
+          x2={URL_CX} y2={URL_CY - NODE_H / 2}
           progress={conn4}
           litProgress={urlGlow}
           id="pg-url"
         />
         <TravelingDot
-          x1={1420} y1={506}
-          x2={1280} y2={594}
+          x1={PG_CX}  y1={PG_CY  + NODE_H / 2}
+          x2={URL_CX} y2={URL_CY - NODE_H / 2}
           progress={dot4}
         />
       </svg>
@@ -228,8 +226,8 @@ export const StorageUploadExplainer: React.FC = () => {
         lines={lines}
         enterFrame={18}
         enterFrom="left"
-        width={580}
-        style={{ position: 'absolute', left: 100, top: 300 }}
+        width={760}
+        style={{ position: 'absolute', left: 80, top: 300 }}
       />
 
       {/* ══ RIGHT: Tree diagram (vertical stack) ════════════════════════════ */}
@@ -237,88 +235,71 @@ export const StorageUploadExplainer: React.FC = () => {
       {/* Root — storage.upload() */}
       <TreeNode
         label="storage.upload()"
-        icon="📦"
+        svgIcon={<IconStorage size={22} color={iconColor(rootGlow)} />}
         cx={ROOT_CX}
         cy={ROOT_CY}
         glow={rootGlow}
         enterFrame={45}
         enterFrom="below"
         root
-        width={160}
+        width={190}
+        height={NODE_H}
       />
 
       {/* Node 1 — Auth Check */}
       <TreeNode
         label="Auth Check"
         sublabel="auth.uid() = owner"
-        icon="🔑"
+        svgIcon={<IconAuth size={20} color={iconColor(authGlow)} />}
         cx={AUTH_CX}
         cy={AUTH_CY}
         glow={authGlow}
         enterFrame={55}
         enterFrom="below"
+        width={160}
+        height={NODE_H}
       />
 
       {/* Node 2a — S3 Storage */}
       <TreeNode
         label="S3 Storage"
         sublabel="file stored"
-        icon="🗄️"
+        svgIcon={<HardDrive size={20} strokeWidth={1.5} color={iconColor(s3Glow)} />}
         cx={S3_CX}
         cy={S3_CY}
         glow={s3Glow}
         enterFrame={65}
         enterFrom="below"
+        width={160}
+        height={NODE_H}
       />
 
       {/* Node 2b — Postgres (lights at exactly the same frame as S3) */}
       <TreeNode
         label="Postgres"
         sublabel="metadata saved"
-        icon="🐘"
+        svgIcon={<IconDatabase size={20} color={iconColor(pgGlow)} />}
         cx={PG_CX}
         cy={PG_CY}
         glow={pgGlow}
         enterFrame={65}
         enterFrom="below"
+        width={160}
+        height={NODE_H}
       />
-
-      {/* "happens in parallel" — centered between S3 and Postgres */}
-      {parallelOp > 0 && (
-        <div
-          style={{
-            position:      'absolute',
-            left:          PG_CX,
-            top:           S3_CY,
-            transform:     'translate(-50%, -50%)',
-            opacity:       parallelOp,
-            pointerEvents: 'none',
-            whiteSpace:    'nowrap',
-          }}
-        >
-          <span
-            style={{
-              fontFamily:    `${interFont}, sans-serif`,
-              fontSize:      12,
-              color:         FG_MUTED,
-              letterSpacing: '0.04em',
-            }}
-          >
-            happens in parallel
-          </span>
-        </div>
-      )}
 
       {/* Node 3 — Public URL */}
       <TreeNode
         label="Public URL"
         sublabel="data.path returned"
-        icon="🔗"
+        svgIcon={<Link size={20} strokeWidth={1.5} color={iconColor(urlGlow)} />}
         cx={URL_CX}
         cy={URL_CY}
         glow={urlGlow}
         enterFrame={75}
         enterFrom="below"
+        width={160}
+        height={NODE_H}
       />
 
       {/* ══ Supabase logo ═══════════════════════════════════════════════════ */}
