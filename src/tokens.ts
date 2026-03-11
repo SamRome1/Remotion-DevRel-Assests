@@ -114,6 +114,10 @@ export const glowStyles = (progress: number): React.CSSProperties => ({
     : '0 6px 24px rgba(0,0,0,0.5)',
 });
 
+// Icon color — use on any icon that responds to node glow state
+// Pass the node's glow progress (0–1); returns GREEN when lit, FG_MUTED when dim
+export const iconColor = (glow: number): string => glow > 0.1 ? GREEN : FG_MUTED;
+
 // Text glow — for code tokens inside lit nodes
 export const glowText = (progress: number): React.CSSProperties => ({
   color:      GREEN,

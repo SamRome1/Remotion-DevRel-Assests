@@ -45,7 +45,8 @@ src/
 import React from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring, Sequence, Img, staticFile } from 'remotion';
 import { loadFont, fontFamily as interFont } from '@remotion/google-fonts/Inter';
-import { GREEN, BG, SURFACE_100, BORDER, MONO, FG, FG_LIGHT, FG_MUTED, boxBase, itp, sp, spSlow, glowStyles, glowText, DotGrid, TrafficLights, CheckIcon, CrossIcon, LockIcon } from '../tokens';
+import { GREEN, BG, SURFACE_100, BORDER, MONO, FG, FG_LIGHT, FG_MUTED, boxBase, itp, sp, spSlow, glowStyles, glowText, iconColor, DotGrid, TrafficLights } from '../tokens';
+import { IconDatabase, IconAuth, IconStorage, IconRealtime, IconEdgeFunctions, IconUser, IconSQL, UploadCloud, HardDrive, Lock, ShieldCheck, Link, Zap, ArrowRight } from '../components/Icons';
 ```
 
 Load Inter at the top of the file, outside the component:
@@ -55,14 +56,97 @@ loadFont('normal', { weights: ['300', '400', '500', '600', '700'] });
 
 ---
 
+## Icon system
+
+**Never use emojis for icons in compositions.** Always use the icon components from `../components/Icons`.
+
+All icons live in `src/components/Icons.tsx`. There are two categories:
+
+### 1. Supabase product icons (inline SVG)
+
+Use these for any node representing a Supabase product or feature:
+
+| Import | Use for |
+|---|---|
+| `IconDatabase` | Postgres / database nodes |
+| `IconAuth` | Auth / RLS / access control |
+| `IconStorage` | Storage buckets / file upload |
+| `IconRealtime` | Realtime / pub-sub / pg_notify |
+| `IconEdgeFunctions` | Edge Functions / serverless |
+| `IconSQL` | SQL editor / query panels |
+| `IconUser` | User identity / JWT |
+
+### 2. Lucide icons (standard UI)
+
+Use for generic UI concepts (arrows, locks, links, status):
+
+| Import | Use for |
+|---|---|
+| `Lock` / `Unlock` | Auth lock state |
+| `ShieldCheck` / `Shield` | RLS / policy |
+| `HardDrive` | S3 / object storage |
+| `UploadCloud` | Upload action |
+| `Link` / `ExternalLink` | URLs / public endpoints |
+| `Zap` | Realtime / fast |
+| `ArrowRight` / `MoveRight` | Request flow |
+| `CheckCircle` / `XCircle` | Allow / deny |
+| `Key` / `KeyRound` | JWT / token |
+
+### Passing icons to TreeNode
+
+Always use the `svgIcon` prop (not the `icon` emoji prop). Use `iconColor()` from tokens to set color based on glow state:
+
+```tsx
+import { iconColor } from '../tokens';
+import { IconDatabase, UploadCloud } from '../components/Icons';
+
+// Inside the component, after computing glow progress:
+<TreeNode
+  label="Postgres"
+  svgIcon={<IconDatabase size={20} color={iconColor(pgGlow)} />}
+  cx={1280} cy={470}
+  glow={pgGlow}
+  enterFrame={65}
+/>
+
+<TreeNode
+  label="Upload"
+  svgIcon={<UploadCloud size={20} strokeWidth={1.5} color={iconColor(rootGlow)} />}
+  cx={1280} cy={160}
+  glow={rootGlow}
+  enterFrame={45}
+  root
+/>
+```
+
+### Icon sizing
+
+| Context | size | strokeWidth |
+|---|---|---|
+| TreeNode (standard) | `20` | `1.5` |
+| TreeNode (root) | `22` | `1.5` |
+| Inline / small | `16` | `1.5` |
+| Hero / large | `28` | `1.5` |
+
+---
+
 ## Layout templates
 
 ### CodeAndTree
 
 Code panel on the left, tree diagram on the right. Each code line activates a matching tree node when it finishes typing.
 
-**Left panel** — positioned at `left: 100, top: 240, width: 620`
-**Right panel** — centered around `cx: 1340` with root node at `cy: 210` and child nodes at `cy: 430`, evenly spaced
+**Left panel** — positioned at `left: 80, top: 280, width: 760`
+**Right panel** — centered at `cx: 1440` (center of the right half, 960–1920). Root node at `cy: 170`, child nodes spaced ~160px apart vertically. For split/parallel nodes, spread horizontally to `cx: 1200` and `cx: 1680` to fill the full right half.
+
+**Node sizes** — standard: `width: 160, height: 80`. Root: `width: 190, height: 80`. Always pass explicit `width` and `height` to every `TreeNode` — never rely on defaults.
+
+**Connector coordinates** — always derive from constants using `NODE_H / 2` offsets, never hardcode pixel values:
+```tsx
+// vertical: bottom of node above → top of node below
+x1={NODE_CX} y1={NODE_CY + NODE_H / 2}
+x2={NEXT_CX} y2={NEXT_CY - NODE_H / 2}
+```
 
 **Animation sequence:**
 1. `(0–22f)` global fade in
@@ -164,7 +248,7 @@ Always apply these colors inside code panels:
 ## Tree node spec
 
 Each node:
-- Size: `width: 130, height: 72` (root: `width: 143`)
+- Size: `width: 160, height: 80` (root: `width: 190, height: 80`) — always pass these explicitly
 - Base style: `{ ...boxBase, borderRadius: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5 }`
 - At rest: `boxBase` styles, label color `FG_MUTED`
 - When lit: spread `glowStyles(progress)` over boxBase, label color `GREEN`
