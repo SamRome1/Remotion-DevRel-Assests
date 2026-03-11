@@ -31,6 +31,10 @@ import { CleanCode } from "./CleanCode";
 import { InstaTemplate } from "./InstaTemplate";
 import { ConstraintsDoc } from "./ConstraintsDoc";
 import { Libraries } from "./Libraries";
+import { ClientBoundary } from "./ClientBoundary";
+import { AuthUidExplainer } from "./TwitterAuthUid";
+import { SupabasePostgresExplainer } from "./TwitterPostgres";
+import { StorageUploadExplainer } from "./StorageUploadExplainer";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -276,9 +280,41 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
       />
       <Composition
+        id="ClientBoundary"
+        component={ClientBoundary}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
         id="Libraries"
         component={Libraries}
         durationInFrames={700}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="AuthUidExplainer"
+        component={AuthUidExplainer}
+        durationInFrames={600}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="SupabasePostgresExplainer"
+        component={SupabasePostgresExplainer}
+        durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="StorageUploadExplainer"
+        component={StorageUploadExplainer}
+        durationInFrames={420}
         fps={30}
         width={1920}
         height={1080}
