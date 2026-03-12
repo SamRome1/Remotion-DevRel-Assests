@@ -35,6 +35,13 @@ import { ClientBoundary } from "./ClientBoundary";
 import { AuthUidExplainer } from "./TwitterAuthUid";
 import { SupabasePostgresExplainer } from "./TwitterPostgres";
 import { StorageUploadExplainer } from "./StorageUploadExplainer";
+import { CursorSupabaseAnnouncement } from "./CursorSupabaseAnnouncement";
+import { ConnectDatabaseAnnouncement } from "./ConnectDatabaseAnnouncement";
+import { EdgeFunctionAnnouncement } from "./EdgeFunctionAnnouncement";
+import { SupabaseBrandReveal } from "./SupabaseBrandReveal";
+import { FileZipAnimation } from "./FileZipAnimation";
+import { DashboardFunctionAnnouncement } from "./DashboardFunctionAnnouncement";
+import { SupabaseBrandRevealBG4 } from "./SupabaseBrandRevealBG4";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -315,6 +322,62 @@ export const RemotionRoot: React.FC = () => {
         id="StorageUploadExplainer"
         component={StorageUploadExplainer}
         durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="CursorSupabaseAnnouncement"
+        component={CursorSupabaseAnnouncement}
+        durationInFrames={180}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ConnectDatabaseAnnouncement"
+        component={ConnectDatabaseAnnouncement}
+        durationInFrames={270}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="EdgeFunctionAnnouncement"
+        component={EdgeFunctionAnnouncement}
+        durationInFrames={200}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="SupabaseBrandReveal"
+        component={SupabaseBrandReveal}
+        durationInFrames={180}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="FileZipAnimation"
+        component={FileZipAnimation}
+        durationInFrames={275}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="DashboardFunctionAnnouncement"
+        component={DashboardFunctionAnnouncement}
+        durationInFrames={210}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="SupabaseBrandRevealBG4"
+        component={SupabaseBrandRevealBG4}
+        durationInFrames={180}
         fps={30}
         width={1920}
         height={1080}
