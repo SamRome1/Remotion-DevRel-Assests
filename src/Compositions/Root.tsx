@@ -42,6 +42,7 @@ import { SupabaseBrandReveal } from "./SupabaseBrandReveal";
 import { FileZipAnimation } from "./FileZipAnimation";
 import { DashboardFunctionAnnouncement } from "./DashboardFunctionAnnouncement";
 import { SupabaseBrandRevealBG4 } from "./SupabaseBrandRevealBG4";
+import { BouncingSupabase } from "./BouncingSupabase";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -378,6 +379,14 @@ export const RemotionRoot: React.FC = () => {
         id="SupabaseBrandRevealBG4"
         component={SupabaseBrandRevealBG4}
         durationInFrames={180}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="BouncingSupabase"
+        component={BouncingSupabase}
+        durationInFrames={600}
         fps={30}
         width={1920}
         height={1080}
