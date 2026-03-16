@@ -43,6 +43,10 @@ import { FileZipAnimation } from "./FileZipAnimation";
 import { DashboardFunctionAnnouncement } from "./DashboardFunctionAnnouncement";
 import { SupabaseBrandRevealBG4 } from "./SupabaseBrandRevealBG4";
 import { BouncingSupabase } from "./BouncingSupabase";
+import { ConnectorsMcpIntro } from "./ConnectorsMcpIntro";
+import { ConnectorsMcpExplainer } from "./ConnectorsMcpExplainer";
+import { McpArchitecture } from "./McpArchitecture";
+import { ConnectorMcpLayer } from "./ConnectorMcpLayer";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -387,6 +391,38 @@ export const RemotionRoot: React.FC = () => {
         id="BouncingSupabase"
         component={BouncingSupabase}
         durationInFrames={600}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ConnectorsMcpIntro"
+        component={ConnectorsMcpIntro}
+        durationInFrames={210}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ConnectorsMcpExplainer"
+        component={ConnectorsMcpExplainer}
+        durationInFrames={510}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="McpArchitecture"
+        component={McpArchitecture}
+        durationInFrames={600}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ConnectorMcpLayer"
+        component={ConnectorMcpLayer}
+        durationInFrames={450}
         fps={30}
         width={1920}
         height={1080}
