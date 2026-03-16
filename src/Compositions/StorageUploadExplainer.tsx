@@ -26,18 +26,18 @@ loadFont('normal', { weights: ['300', '400', '500', '600', '700'] });
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Tree centered at cx=1440 (center of right half: 960–1920)
-// Nodes fill the full right half — split pair spread to cx=1200 / cx=1680
+// Nodes fill the full right half — split pair spread to cx=1140 / cx=1740
 const ROOT_CX = 1440;
-const ROOT_CY = 170;
+const ROOT_CY = 110;
 const AUTH_CX = 1440;
-const AUTH_CY = 330;
-const S3_CX   = 1200;
-const S3_CY   = 500;
-const PG_CX   = 1680;
-const PG_CY   = 500;
+const AUTH_CY = 310;
+const S3_CX   = 1140;
+const S3_CY   = 570;
+const PG_CX   = 1740;
+const PG_CY   = 570;
 const URL_CX  = 1440;
-const URL_CY  = 670;
-const NODE_H  = 80;
+const URL_CY  = 840;
+const NODE_H  = 96;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Timeline (420 frames = 14s @ 30fps)
@@ -226,8 +226,9 @@ export const StorageUploadExplainer: React.FC = () => {
         lines={lines}
         enterFrame={18}
         enterFrom="left"
-        width={760}
-        style={{ position: 'absolute', left: 80, top: 300 }}
+        width={860}
+        codeFontSize={19}
+        style={{ position: 'absolute', left: 60, top: 280 }}
       />
 
       {/* ══ RIGHT: Tree diagram (vertical stack) ════════════════════════════ */}
@@ -235,14 +236,14 @@ export const StorageUploadExplainer: React.FC = () => {
       {/* Root — storage.upload() */}
       <TreeNode
         label="storage.upload()"
-        svgIcon={<IconStorage size={22} color={iconColor(rootGlow)} />}
+        svgIcon={<IconStorage size={26} color={iconColor(rootGlow)} />}
         cx={ROOT_CX}
         cy={ROOT_CY}
         glow={rootGlow}
         enterFrame={45}
         enterFrom="below"
         root
-        width={190}
+        width={230}
         height={NODE_H}
       />
 
@@ -250,13 +251,13 @@ export const StorageUploadExplainer: React.FC = () => {
       <TreeNode
         label="Auth Check"
         sublabel="auth.uid() = owner"
-        svgIcon={<IconAuth size={20} color={iconColor(authGlow)} />}
+        svgIcon={<IconAuth size={24} color={iconColor(authGlow)} />}
         cx={AUTH_CX}
         cy={AUTH_CY}
         glow={authGlow}
         enterFrame={55}
         enterFrom="below"
-        width={160}
+        width={200}
         height={NODE_H}
       />
 
@@ -264,13 +265,13 @@ export const StorageUploadExplainer: React.FC = () => {
       <TreeNode
         label="S3 Storage"
         sublabel="file stored"
-        svgIcon={<HardDrive size={20} strokeWidth={1.5} color={iconColor(s3Glow)} />}
+        svgIcon={<HardDrive size={24} strokeWidth={1.5} color={iconColor(s3Glow)} />}
         cx={S3_CX}
         cy={S3_CY}
         glow={s3Glow}
         enterFrame={65}
         enterFrom="below"
-        width={160}
+        width={200}
         height={NODE_H}
       />
 
@@ -278,13 +279,13 @@ export const StorageUploadExplainer: React.FC = () => {
       <TreeNode
         label="Postgres"
         sublabel="metadata saved"
-        svgIcon={<IconDatabase size={20} color={iconColor(pgGlow)} />}
+        svgIcon={<IconDatabase size={24} color={iconColor(pgGlow)} />}
         cx={PG_CX}
         cy={PG_CY}
         glow={pgGlow}
         enterFrame={65}
         enterFrom="below"
-        width={160}
+        width={200}
         height={NODE_H}
       />
 
@@ -292,13 +293,13 @@ export const StorageUploadExplainer: React.FC = () => {
       <TreeNode
         label="Public URL"
         sublabel="data.path returned"
-        svgIcon={<Link size={20} strokeWidth={1.5} color={iconColor(urlGlow)} />}
+        svgIcon={<Link size={24} strokeWidth={1.5} color={iconColor(urlGlow)} />}
         cx={URL_CX}
         cy={URL_CY}
         glow={urlGlow}
         enterFrame={75}
         enterFrom="below"
-        width={160}
+        width={200}
         height={NODE_H}
       />
 

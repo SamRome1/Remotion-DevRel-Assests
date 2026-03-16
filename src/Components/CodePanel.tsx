@@ -61,6 +61,8 @@ export interface CodePanelProps {
   exitFrame?: number;
   exitTo?: 'left' | 'right';
   width?: number;
+  /** Font size for code lines. Default 15 */
+  codeFontSize?: number;
   style?: React.CSSProperties;
 }
 
@@ -102,7 +104,8 @@ const renderTokens = (
 const CodeLineRow: React.FC<{
   line: CodeLineData;
   frame: number;
-}> = ({ line, frame }) => {
+  codeFontSize?: number;
+}> = ({ line, frame, codeFontSize = 15 }) => {
   const { tokens, startFrame, active = 0, showAccent = true } = line;
 
   const totalChars = tokens.reduce((n, t) => n + t.text.length, 0);
@@ -144,7 +147,7 @@ const CodeLineRow: React.FC<{
       <div
         style={{
           fontFamily: MONO,
-          fontSize:   15,
+          fontSize:   codeFontSize,
           lineHeight: 1.6,
         }}
       >
@@ -177,11 +180,12 @@ export const CodePanel: React.FC<CodePanelProps> = ({
   filename,
   lines,
   annotation,
-  enterFrame = 0,
-  enterFrom  = 'left',
+  enterFrame   = 0,
+  enterFrom    = 'left',
   exitFrame,
-  exitTo     = 'left',
-  width      = 620,
+  exitTo       = 'left',
+  width        = 620,
+  codeFontSize = 15,
   style,
 }) => {
   const frame = useCurrentFrame();
@@ -231,7 +235,7 @@ export const CodePanel: React.FC<CodePanelProps> = ({
       {/* Code lines */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {visibleLines.map((line, i) => (
-          <CodeLineRow key={i} line={line} frame={frame} />
+          <CodeLineRow key={i} line={line} frame={frame} codeFontSize={codeFontSize} />
         ))}
       </div>
 

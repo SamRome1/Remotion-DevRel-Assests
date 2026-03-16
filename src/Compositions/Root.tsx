@@ -47,6 +47,19 @@ import { ConnectorsMcpIntro } from "./ConnectorsMcpIntro";
 import { ConnectorsMcpExplainer } from "./ConnectorsMcpExplainer";
 import { McpArchitecture } from "./McpArchitecture";
 import { ConnectorMcpLayer } from "./ConnectorMcpLayer";
+import { RolesExplainer } from "./RolesExplainer";
+import { RlsToggleExplainer } from "./RlsToggleExplainer";
+import { JwtClaimsExplainer } from "./JwtClaimsExplainer";
+import { BucketsExplainer } from "./BucketsExplainer";
+import { ImageTransformExplainer } from "./ImageTransformExplainer";
+import { RealtimeWalExplainer } from "./RealtimeWalExplainer";
+import { PresenceExplainer } from "./PresenceExplainer";
+import { SignInFlowExplainer } from "./SignInFlowExplainer";
+import { PostgrestExplainer } from "./PostgrestExplainer";
+import { FunctionsExplainer } from "./FunctionsExplainer";
+import { TriggersExplainer } from "./TriggersExplainer";
+import { ForeignKeysExplainer } from "./ForeignKeysExplainer";
+import { PgCronExplainer } from "./PgCronExplainer";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -423,6 +436,110 @@ export const RemotionRoot: React.FC = () => {
         id="ConnectorMcpLayer"
         component={ConnectorMcpLayer}
         durationInFrames={450}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="RolesExplainer"
+        component={RolesExplainer}
+        durationInFrames={300}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="RlsToggleExplainer"
+        component={RlsToggleExplainer}
+        durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="JwtClaimsExplainer"
+        component={JwtClaimsExplainer}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="BucketsExplainer"
+        component={BucketsExplainer}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ImageTransformExplainer"
+        component={ImageTransformExplainer}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="RealtimeWalExplainer"
+        component={RealtimeWalExplainer}
+        durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="PresenceExplainer"
+        component={PresenceExplainer}
+        durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="SignInFlowExplainer"
+        component={SignInFlowExplainer}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="PostgrestExplainer"
+        component={PostgrestExplainer}
+        durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="FunctionsExplainer"
+        component={FunctionsExplainer}
+        durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TriggersExplainer"
+        component={TriggersExplainer}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ForeignKeysExplainer"
+        component={ForeignKeysExplainer}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="PgCronExplainer"
+        component={PgCronExplainer}
+        durationInFrames={300}
         fps={30}
         width={1920}
         height={1080}
