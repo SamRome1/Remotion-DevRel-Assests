@@ -1,6 +1,7 @@
 import "./index.css";
 import { Composition } from "remotion";
 import { MyComposition } from "./Composition";
+import { GitHubStarsGrowth } from "./GitHubStarsGrowth";
 import { SupabaseThumbnail } from "./SupabaseThumbnail";
 import { CodeEditorChaos } from "./CodeEditorChaos";
 import { ZeroRevenue } from "./ZeroRevenue";
@@ -60,6 +61,15 @@ import { FunctionsExplainer } from "./FunctionsExplainer";
 import { TriggersExplainer } from "./TriggersExplainer";
 import { ForeignKeysExplainer } from "./ForeignKeysExplainer";
 import { PgCronExplainer } from "./PgCronExplainer";
+import { ConnectorsMcpConfusion } from "./ConnectorsMcpConfusion";
+import { ConnectorsArchitecture } from "./ConnectorsArchitecture";
+import { McpManualSetup } from "./McpManualSetup";
+import { SequentialVsIndexScan } from "./SequentialVsIndexScan";
+import { ConnectButton } from "./ConnectButton";
+import { UnderTheHood } from "./UnderTheHood";
+import { ZeroSetup } from "./ZeroSetup";
+import { FullControl } from "./FullControl";
+import { ConnectorVsMcp } from "./ConnectorVsMcp";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -542,6 +552,86 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames={300}
         fps={30}
         width={1920}
+        height={1080}
+      />
+      <Composition
+        id="GitHubStarsGrowth"
+        component={GitHubStarsGrowth}
+        durationInFrames={750}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ConnectorsMcpConfusion"
+        component={ConnectorsMcpConfusion}
+        durationInFrames={320}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ConnectorsArchitecture"
+        component={ConnectorsArchitecture}
+        durationInFrames={510}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="McpManualSetup"
+        component={McpManualSetup}
+        durationInFrames={480}
+        fps={30}
+        width={1280}
+        height={1080}
+      />
+      <Composition
+        id="SequentialVsIndexScan"
+        component={SequentialVsIndexScan}
+        durationInFrames={390}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ConnectButton"
+        component={ConnectButton}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="UnderTheHood"
+        component={UnderTheHood}
+        durationInFrames={270}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="ZeroSetup"
+        component={ZeroSetup}
+        durationInFrames={240}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="FullControl"
+        component={FullControl}
+        durationInFrames={300}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="ConnectorVsMcp"
+        component={ConnectorVsMcp}
+        durationInFrames={390}
+        fps={30}
+        width={1080}
         height={1080}
       />
     </>
