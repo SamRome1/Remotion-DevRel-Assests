@@ -42,10 +42,11 @@ export const FG_MUTED   = 'rgba(255,255,255,0.28)';  // dim / inactive
 export const FG_SUBTLE  = 'rgba(255,255,255,0.12)';  // placeholder
 
 // ── Typography ────────────────────────────────────────────────────────────────
+// Primary: Circular Std (Supabase brand font). Import from src/fonts.ts — the
+// module-level delayRender ensures Remotion waits for the font before rendering.
+//   import { circularFamily } from '../fonts';
+//   fontFamily: circularFamily
 export const MONO = '"JetBrains Mono", "Fira Code", ui-monospace, monospace';
-// Inter is loaded via @remotion/google-fonts/Inter in each composition:
-// import { loadFont, fontFamily as interFont } from '@remotion/google-fonts/Inter'
-// loadFont('normal', { weights: ['300', '400', '500', '600', '700'] })
 
 // ── Dot grid background ───────────────────────────────────────────────────────
 export const DOT_GRID_STYLE: React.CSSProperties = {

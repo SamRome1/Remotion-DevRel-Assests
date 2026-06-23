@@ -71,6 +71,25 @@ import { ZeroSetup } from "./ZeroSetup";
 import { FullControl } from "./FullControl";
 import { ConnectorVsMcp } from "./ConnectorVsMcp";
 import { SupabaseGlitch } from "./SupabaseGlitch";
+import { ClaudeCodeTerminal } from "./ClaudeCodeTerminal";
+import { ComputerToAgent } from "./ComputerToAgent";
+import { ViralDatabaseStory } from "./ViralDatabaseStory";
+import { DatabaseBillCut } from "./DatabaseBillCut";
+import { AIMusicApp } from "./AIMusicApp";
+import { NasaChecklist } from "./NasaChecklist";
+import { AgentResources } from "./AgentResources";
+import { ClaudeCodeIntro } from "./ClaudeCodeIntro";
+import { GitWorktreeAnimation } from "./GitWorktreeAnimation";
+import { AIRace } from "./AIRace";
+import { EasierWay } from "./EasierWay";
+import { AgentCollision } from "./AgentCollision";
+import { WorktreeParallelAgents } from "./WorktreeParallelAgents";
+import { SupabaseRise } from "./SupabaseRise";
+import { FirebaseLockIn } from "./FirebaseLockIn";
+import { VibeCoding } from "./VibeCoding";
+import { UserScaling } from "./UserScaling";
+import { ClaudeStealthFeatures } from "./ClaudeStealthFeatures";
+import { ClaudeFileMove } from "./ClaudeFileMove";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -639,6 +658,158 @@ export const RemotionRoot: React.FC = () => {
         id="SupabaseGlitch"
         component={SupabaseGlitch}
         durationInFrames={180}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ClaudeCodeTerminal"
+        component={ClaudeCodeTerminal}
+        durationInFrames={360}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="ComputerToAgent"
+        component={ComputerToAgent}
+        durationInFrames={580}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ViralDatabaseStory"
+        component={ViralDatabaseStory}
+        durationInFrames={420}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="DatabaseBillCut"
+        component={DatabaseBillCut}
+        durationInFrames={390}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="AIMusicApp"
+        component={AIMusicApp}
+        durationInFrames={453}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="NasaChecklist"
+        component={NasaChecklist}
+        durationInFrames={420}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="AgentResources"
+        component={AgentResources}
+        durationInFrames={210}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="ClaudeCodeIntro"
+        component={ClaudeCodeIntro}
+        durationInFrames={290}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="GitWorktreeAnimation"
+        component={GitWorktreeAnimation}
+        durationInFrames={300}
+        fps={30}
+        width={1280}
+        height={1080}
+      />
+      <Composition
+        id="AIRace"
+        component={AIRace}
+        durationInFrames={180}
+        fps={30}
+        width={1280}
+        height={1080}
+      />
+      <Composition
+        id="EasierWay"
+        component={EasierWay}
+        durationInFrames={150}
+        fps={30}
+        width={1280}
+        height={1080}
+      />
+      <Composition
+        id="AgentCollision"
+        component={AgentCollision}
+        durationInFrames={210}
+        fps={30}
+        width={1280}
+        height={1080}
+      />
+      <Composition
+        id="WorktreeParallelAgents"
+        component={WorktreeParallelAgents}
+        durationInFrames={323}
+        fps={30}
+        width={1280}
+        height={1080}
+      />
+      <Composition
+        id="SupabaseRise"
+        component={SupabaseRise}
+        durationInFrames={90}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="FirebaseLockIn"
+        component={FirebaseLockIn}
+        durationInFrames={90}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="VibeCoding"
+        component={VibeCoding}
+        durationInFrames={180}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="UserScaling"
+        component={UserScaling}
+        durationInFrames={180}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ClaudeStealthFeatures"
+        component={ClaudeStealthFeatures}
+        durationInFrames={480}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ClaudeFileMove"
+        component={ClaudeFileMove}
+        durationInFrames={375}
         fps={30}
         width={1920}
         height={1080}
