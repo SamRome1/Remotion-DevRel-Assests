@@ -90,6 +90,8 @@ import { VibeCoding } from "./VibeCoding";
 import { UserScaling } from "./UserScaling";
 import { ClaudeStealthFeatures } from "./ClaudeStealthFeatures";
 import { ClaudeFileMove } from "./ClaudeFileMove";
+import { UnifiedLogsAnnouncement } from "./UnifiedLogsAnnouncement";
+import { CommunityWall100K } from "./CommunityWall100K";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -813,6 +815,22 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        id="UnifiedLogsAnnouncement"
+        component={UnifiedLogsAnnouncement}
+        durationInFrames={600}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="CommunityWall100K"
+        component={CommunityWall100K}
+        durationInFrames={900}
+        fps={30}
+        width={1080}
+        height={1920}
       />
     </>
   );
