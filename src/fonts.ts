@@ -1,5 +1,8 @@
 import { delayRender, continueRender, staticFile } from 'remotion';
 
+// Circular Std is a licensed font and is NOT committed. Drop CircularStd-Book.otf
+// into public/fonts/ locally (gitignored). If it is missing, compositions fall
+// back to system-ui without failing the render.
 const handle = delayRender('Loading CircularStd font');
 
 const face = new FontFace(

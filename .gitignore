@@ -9,3 +9,6 @@ out
 
 # Agent memory (local only)
 .claude/agent-memory/
+
+# Licensed fonts stay local only (Circular Std is a paid Lineto font). Place CircularStd-Book.otf in public/fonts/.
+public/fonts/
