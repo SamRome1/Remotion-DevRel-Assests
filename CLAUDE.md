@@ -1,3 +1,26 @@
+# REQUIRED FIRST STEP — Video brief gate
+
+**Any request to create a new video, animation, composition, or scene sequence MUST begin with a completed brief in the format of `docs/VIDEO_BRIEF_TEMPLATE.md`. This step cannot be skipped.**
+
+When the user asks for a new video and has not supplied a brief:
+1. Do NOT write code, scaffold files, or download assets yet.
+2. Reply with: "This project requires a specific brief format to ensure the visuals are professional. Please fill this out in a format similar to the following:" and paste the full contents of `docs/VIDEO_BRIEF_TEMPLATE.md`. Point to `docs/briefs/shortform-openai-postgres.md` as a completed example.
+3. Wait for the brief. If any REQUIRED section is missing or a placeholder like `#______` is unfilled, ask for it before building.
+
+The only bypass: the user explicitly states they are deliberately skipping the brief (e.g. "skip the brief", "no brief, just build it"). A vague "just do it" does not count — ask once whether they mean to skip. If they confirm, say so in the first line of your reply and fall back to the Supabase defaults in this file.
+
+When a brief IS provided:
+- Its VISUAL SYSTEM section overrides the Supabase color and typography defaults below for that composition.
+- Its ASSET RULES and ARCHITECTURE sections always apply.
+- Follow the assets-batch step literally: download and verify every asset (render the `AssetCheck` composition), stop and report the file list, and wait for the go-ahead before building any scene.
+- Save the brief to `docs/briefs/<composition-id>.md` so future edits stay in sync with it.
+
+Edits to an existing composition do not need a new brief — use the one in `docs/briefs/`.
+
+**When a video is done: verify stills from every scene, render the MP4 to `out/`, then commit and push to GitHub (`origin/main`) unless the user says otherwise.**
+
+---
+
 # Remotion Animations — Supabase Styling Guide
 
 This project produces Remotion video compositions for Supabase content. All animations must follow Supabase brand principles.

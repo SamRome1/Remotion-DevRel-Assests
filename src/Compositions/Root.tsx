@@ -1,6 +1,9 @@
 import "./index.css";
 import { Composition } from "remotion";
 import { MyComposition } from "./Composition";
+import { ShortForm, SHORT_FORM_DURATION } from "./ShortForm";
+import { AssetCheck } from "./AssetCheck";
+import { CANVAS } from "../theme";
 import { GitHubStarsGrowth } from "./GitHubStarsGrowth";
 import { SupabaseThumbnail } from "./SupabaseThumbnail";
 import { CodeEditorChaos } from "./CodeEditorChaos";
@@ -92,6 +95,14 @@ import { ClaudeStealthFeatures } from "./ClaudeStealthFeatures";
 import { ClaudeFileMove } from "./ClaudeFileMove";
 import { UnifiedLogsAnnouncement } from "./UnifiedLogsAnnouncement";
 import { CommunityWall100K } from "./CommunityWall100K";
+import { TweetDestroysAgent } from "./TweetDestroysAgent";
+import { TweetHeardRoundDiscord } from "./TweetHeardRoundDiscord";
+import { NewAgeSparked } from "./NewAgeSparked";
+import { LoopsToGraphs } from "./LoopsToGraphs";
+import { NinetyPercentWrong } from "./NinetyPercentWrong";
+import { AgentOrgChart } from "./AgentOrgChart";
+import { GeminiSupabaseIntro } from "./GeminiSupabaseIntro";
+import { TimeToOneMillionUsers } from "./TimeToOneMillionUsers";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -831,6 +842,86 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1920}
+      />
+      <Composition
+        id="TweetDestroysAgent"
+        component={TweetDestroysAgent}
+        durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="TweetHeardRoundDiscord"
+        component={TweetHeardRoundDiscord}
+        durationInFrames={210}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="NewAgeSparked"
+        component={NewAgeSparked}
+        durationInFrames={150}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="LoopsToGraphs"
+        component={LoopsToGraphs}
+        durationInFrames={900}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="NinetyPercentWrong"
+        component={NinetyPercentWrong}
+        durationInFrames={150}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="AgentOrgChart"
+        component={AgentOrgChart}
+        durationInFrames={600}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="GeminiSupabaseIntro"
+        component={GeminiSupabaseIntro}
+        durationInFrames={280}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="TimeToOneMillionUsers"
+        component={TimeToOneMillionUsers}
+        durationInFrames={420}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="AssetCheck"
+        component={AssetCheck}
+        durationInFrames={1}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="ShortForm"
+        component={ShortForm}
+        durationInFrames={SHORT_FORM_DURATION}
+        fps={CANVAS.fps}
+        width={CANVAS.width}
+        height={CANVAS.height}
       />
     </>
   );
