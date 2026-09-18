@@ -18,8 +18,10 @@ export const Frame: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   </AbsoluteFill>
 );
 
-export const SectionTitle: React.FC<{ n: string; title: string; frame: number; at: number }> = ({ n, title, frame, at }) => (
-  <div style={{ position: 'absolute', left: L, top: 130, ...stamp(frame, at) }}>
+export const SectionTitle: React.FC<{ n: string; title: string; frame: number; at: number; left?: number; top?: number }> = ({
+  n, title, frame, at, left = L, top = 130,
+}) => (
+  <div style={{ position: 'absolute', left, top, ...stamp(frame, at) }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <span style={{ background: bp.accent, color: bp.onAccent, fontWeight: 700, fontSize: 22, padding: '4px 10px', boxShadow: glow }}>{n}</span>
       <span style={{ fontWeight: 700, fontSize: 40, letterSpacing: 1 }}>{title}</span>
@@ -31,18 +33,25 @@ export const SectionTitle: React.FC<{ n: string; title: string; frame: number; a
 export const Panel: React.FC<{
   y: number;
   h: number;
+  x?: number;
+  w?: number;
+  pad?: number;
   title: string;
   subtitle?: string;
+  headerRight?: React.ReactNode;
+  titleSize?: number;
+  subtitleSize?: number;
   frame: number;
   at: number;
   children: React.ReactNode;
-}> = ({ y, h, title, subtitle, frame, at, children }) => (
-  <div style={{ position: 'absolute', left: L, top: y, width: W, height: h, background: bp.panel, border, ...stamp(frame, at) }}>
-    <div style={{ height: 64, borderBottom: border, display: 'flex', alignItems: 'center', gap: 14, padding: '0 24px' }}>
-      <span style={{ fontWeight: 700, fontSize: 24 }}>{title}</span>
-      {subtitle && <span style={{ color: bp.grey, fontSize: 20 }}>{subtitle}</span>}
+}> = ({ y, h, x = L, w = W, pad = 32, title, subtitle, headerRight, titleSize = 24, subtitleSize = 20, frame, at, children }) => (
+  <div style={{ position: 'absolute', left: x, top: y, width: w, height: h, background: bp.panel, border, ...stamp(frame, at) }}>
+    <div style={{ height: 64, borderBottom: border, display: 'flex', alignItems: 'center', gap: 14, padding: '0 24px', whiteSpace: 'nowrap' }}>
+      <span style={{ fontWeight: 700, fontSize: titleSize }}>{title}</span>
+      {subtitle && <span style={{ color: bp.grey, fontSize: subtitleSize }}>{subtitle}</span>}
+      {headerRight && <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>{headerRight}</span>}
     </div>
-    <div style={{ padding: 32 }}>{children}</div>
+    <div style={{ padding: pad }}>{children}</div>
   </div>
 );
 
@@ -89,6 +98,40 @@ export const Connector: React.FC<{ y1: number; y2: number; frame: number; drawAt
   );
 };
 
+interface LinkTravel { from: number; to: number; label: string; reverse?: boolean }
+
+/** Axis-aligned connector from p1 to p2 (draws p1→p2) with an optional traveling chip. */
+export const Link: React.FC<{ x1: number; y1: number; x2: number; y2: number; frame: number; drawAt: number; travel?: LinkTravel }> = ({
+  x1, y1, x2, y2, frame, drawAt, travel,
+}) => {
+  const drawn = itp(frame, drawAt, drawAt + 10);
+  const horizontal = y1 === y2;
+  const len = (horizontal ? Math.abs(x2 - x1) : Math.abs(y2 - y1)) * drawn;
+  const lineStyle: React.CSSProperties = horizontal
+    ? { left: x2 >= x1 ? x1 : x1 - len, top: y1 - 1, width: len, height: 2 }
+    : { left: x1 - 1, top: y2 >= y1 ? y1 : y1 - len, width: 2, height: len };
+
+  let chip: React.ReactNode = null;
+  if (travel && frame >= travel.from && frame <= travel.to + 4) {
+    const p = itp(frame, travel.from, travel.to);
+    const t = travel.reverse ? 1 - p : p;
+    const x = x1 + (x2 - x1) * t;
+    const y = y1 + (y2 - y1) * t;
+    const fade = itp(frame, travel.to, travel.to + 4, 1, 0);
+    chip = (
+      <div style={{ position: 'absolute', left: x, top: y, transform: 'translate(-50%,-50%)', opacity: fade }}>
+        <Chip text={travel.label} style={{ border }} />
+      </div>
+    );
+  }
+  return (
+    <>
+      <div style={{ position: 'absolute', background: bp.line, ...lineStyle }} />
+      {chip}
+    </>
+  );
+};
+
 export const Timer: React.FC<{ value: number; state: 'running' | 'slow' | 'fast'; frame: number; at: number }> = ({ value, state, frame, at }) => {
   const look =
     state === 'slow' ? { background: bp.redPale, color: bp.red }
@@ -123,17 +166,27 @@ export const TypedTokens: React.FC<{ tokens: string[]; frame: number; start: num
   );
 };
 
-export const ScoreRow: React.FC<{ label: string; fill: number; score: number; selected: boolean; showScore: boolean; frame: number; at: number }> = ({
-  label, fill, score, selected, showScore, frame, at,
-}) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: 28, height: 96, ...stamp(frame, at) }}>
-    <div style={{ width: 220, height: 76, border: selected ? `2px solid ${bp.accent}` : border, background: selected ? bp.accent : bp.panel, color: selected ? bp.onAccent : bp.ink, boxShadow: selected ? glow : undefined, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 26 }}>
+export const ScoreRow: React.FC<{
+  label: string;
+  fill: number;
+  score: number;
+  selected: boolean;
+  showScore: boolean;
+  frame: number;
+  at: number;
+  rowH?: number;
+  labelW?: number;
+  labelH?: number;
+  fontSize?: number;
+}> = ({ label, fill, score, selected, showScore, frame, at, rowH = 96, labelW = 220, labelH = 76, fontSize = 26 }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: 28, height: rowH, ...stamp(frame, at) }}>
+    <div style={{ width: labelW, height: labelH, border: selected ? `2px solid ${bp.accent}` : border, background: selected ? bp.accent : bp.panel, color: selected ? bp.onAccent : bp.ink, boxShadow: selected ? glow : undefined, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize }}>
       {label}
     </div>
-    <div style={{ flex: 1, height: 30, border, position: 'relative', background: bp.panel }}>
+    <div style={{ flex: 1, height: Math.round(labelH * 0.4), border, position: 'relative', background: bp.panel }}>
       <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${fill * 100}%`, background: selected ? bp.accent : bp.barDim, boxShadow: selected ? glow : undefined }} />
     </div>
-    <div style={{ width: 90, fontSize: 28, fontWeight: 500, textAlign: 'right' }}>{showScore ? score.toFixed(2) : ''}</div>
+    <div style={{ width: 90, fontSize: fontSize + 2, fontWeight: 500, textAlign: 'right' }}>{showScore ? score.toFixed(2) : ''}</div>
   </div>
 );
 
