@@ -15,6 +15,8 @@ export const ASSET_FILES = [
   'postgresql.svg',
   'github.svg',
   'supabase.svg',
+  'jev-mark-white.png',
+  'jev-mark-green.png',
 ];
 
 export const AssetCheck: React.FC = () => (

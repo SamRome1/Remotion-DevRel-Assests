@@ -103,6 +103,7 @@ import { NinetyPercentWrong } from "./NinetyPercentWrong";
 import { AgentOrgChart } from "./AgentOrgChart";
 import { GeminiSupabaseIntro } from "./GeminiSupabaseIntro";
 import { TimeToOneMillionUsers } from "./TimeToOneMillionUsers";
+import { JevConfidencePicker, JEV_CONFIDENCE_PICKER_DURATION } from "./JevConfidencePicker";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -914,6 +915,14 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1080}
         height={1080}
+      />
+      <Composition
+        id="JevConfidencePicker"
+        component={JevConfidencePicker}
+        durationInFrames={JEV_CONFIDENCE_PICKER_DURATION}
+        fps={30}
+        width={1080}
+        height={1920}
       />
       <Composition
         id="ShortForm"
