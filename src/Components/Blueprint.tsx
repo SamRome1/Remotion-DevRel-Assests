@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbsoluteFill } from 'remotion';
-import { MONO, bp, border, itp, stamp } from '../blueprint';
+import { MONO, bp, border, glow, itp, stamp } from '../blueprint';
 
 // Shared 1080x1920 layout grid — every scene places panels on these lines so
 // hard cuts between scenes read as continuous.
@@ -13,7 +13,7 @@ export const ANS_Y = 680;
 
 export const Frame: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AbsoluteFill style={{ backgroundColor: bp.paper, fontFamily: MONO, color: bp.ink }}>
-    <div style={{ position: 'absolute', inset: 40, border, boxShadow: `6px 6px 0 ${bp.ink}` }} />
+    <div style={{ position: 'absolute', inset: 40, border, boxShadow: `6px 6px 0 rgba(62,207,142,0.4)` }} />
     {children}
   </AbsoluteFill>
 );
@@ -21,7 +21,7 @@ export const Frame: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 export const SectionTitle: React.FC<{ n: string; title: string; frame: number; at: number }> = ({ n, title, frame, at }) => (
   <div style={{ position: 'absolute', left: L, top: 130, ...stamp(frame, at) }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-      <span style={{ background: bp.yellow, fontWeight: 700, fontSize: 22, padding: '4px 10px' }}>{n}</span>
+      <span style={{ background: bp.accent, color: bp.onAccent, fontWeight: 700, fontSize: 22, padding: '4px 10px', boxShadow: glow }}>{n}</span>
       <span style={{ fontWeight: 700, fontSize: 40, letterSpacing: 1 }}>{title}</span>
     </div>
     <div style={{ height: 3, background: bp.ink, marginTop: 14, width: 440 }} />
@@ -47,14 +47,14 @@ export const Panel: React.FC<{
 );
 
 export const Chip: React.FC<{ text: string; bg?: string; color?: string; size?: number; style?: React.CSSProperties }> = ({
-  text, bg = bp.yellow, color = bp.ink, size = 20, style,
+  text, bg = bp.accent, color = bp.onAccent, size = 20, style,
 }) => (
-  <span style={{ display: 'inline-block', background: bg, color, fontWeight: 700, fontSize: size, padding: '4px 12px', lineHeight: 1.2, ...style }}>
+  <span style={{ display: 'inline-block', background: bg, color, fontWeight: 700, fontSize: size, padding: '4px 12px', lineHeight: 1.2, boxShadow: bg === bp.accent ? glow : undefined, ...style }}>
     {text}
   </span>
 );
 
-export const Highlight: React.FC<{ children: React.ReactNode; bg?: string; color?: string }> = ({ children, bg = bp.yellowPale, color }) => (
+export const Highlight: React.FC<{ children: React.ReactNode; bg?: string; color?: string }> = ({ children, bg = bp.accentPale, color }) => (
   <span style={{ background: bg, color, padding: '2px 8px', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}>{children}</span>
 );
 
@@ -92,7 +92,7 @@ export const Connector: React.FC<{ y1: number; y2: number; frame: number; drawAt
 export const Timer: React.FC<{ value: number; state: 'running' | 'slow' | 'fast'; frame: number; at: number }> = ({ value, state, frame, at }) => {
   const look =
     state === 'slow' ? { background: bp.redPale, color: bp.red }
-    : state === 'fast' ? { background: bp.yellow, color: bp.ink }
+    : state === 'fast' ? { background: bp.accent, color: bp.onAccent, boxShadow: glow }
     : { color: bp.grey };
   return (
     <div style={{ position: 'absolute', right: L, top: ANS_Y - 78, fontWeight: 700, fontSize: 40, padding: '2px 12px', ...look, ...stamp(frame, at) }}>
@@ -112,7 +112,7 @@ export const TypedTokens: React.FC<{ tokens: string[]; frame: number; start: num
       {tokens.slice(0, visible).map((t, i) => {
         const bad = i >= badFrom;
         const newest = i === visible - 1 && !done;
-        const bg = newest ? (bad ? bp.red : bp.yellowPale) : bad ? bp.redPale : 'transparent';
+        const bg = newest ? (bad ? bp.red : bp.accentPale) : bad ? bp.redPale : 'transparent';
         const color = newest && bad ? bp.paper : bad ? bp.red : bp.ink;
         return (
           <span key={i} style={{ background: bg, color, padding: '0 6px', marginRight: 6 }}>{t}</span>
@@ -127,11 +127,11 @@ export const ScoreRow: React.FC<{ label: string; fill: number; score: number; se
   label, fill, score, selected, showScore, frame, at,
 }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: 28, height: 96, ...stamp(frame, at) }}>
-    <div style={{ width: 220, height: 76, border, background: selected ? bp.yellow : bp.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 26 }}>
+    <div style={{ width: 220, height: 76, border: selected ? `2px solid ${bp.accent}` : border, background: selected ? bp.accent : bp.panel, color: selected ? bp.onAccent : bp.ink, boxShadow: selected ? glow : undefined, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 26 }}>
       {label}
     </div>
     <div style={{ flex: 1, height: 30, border, position: 'relative', background: bp.panel }}>
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${fill * 100}%`, background: selected ? bp.ink : bp.grey }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${fill * 100}%`, background: selected ? bp.accent : bp.barDim, boxShadow: selected ? glow : undefined }} />
     </div>
     <div style={{ width: 90, fontSize: 28, fontWeight: 500, textAlign: 'right' }}>{showScore ? score.toFixed(2) : ''}</div>
   </div>

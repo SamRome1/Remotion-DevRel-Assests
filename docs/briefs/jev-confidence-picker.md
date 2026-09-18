@@ -16,11 +16,11 @@ Reference: the "paper blueprint" explainer style of @MatijaSosic's 45s Jev TL;DR
   4. "and it can only pick from that list with a confidence score." → Scene 4
 
 ## 1. VISUAL SYSTEM — apply to every scene, no exceptions
-This composition deliberately does NOT use the Supabase dark system. Its tokens live in `src/blueprint.ts`.
-- Background: cream paper `#f6f5ee`, with a 2px black frame inset 40px and a hard 6px offset shadow (paper-on-desk look). No gradients, no noise, no dot grid.
-- Panels: white `#ffffff`, 2px black `#1a1a1a` border, square corners, 64px header row with a bold title and a grey subtitle, 32px body padding.
-- Typography: JetBrains Mono for everything (via `@remotion/google-fonts`, weights 400/500/700). Ink `#1a1a1a` primary, `#4a4a46` captions, `#8a8a85` notes/subtitles.
-- Accents: yellow `#f4c740` (chips: section number, request token, timer when fast, winning option, takeaway) and pale yellow `#fdf0c8` (the question highlight, newest token). Red `#d9483b` / pale red `#f8d3cf` only for the LLM's slow timer and garbage tokens. No other color.
+The reference's blueprint *layout* on the Supabase *palette*. Tokens live in `src/blueprint.ts` (which pulls colors from `src/tokens.ts`).
+- Background: `BG` `#0f0f0f`, with a 2px hairline frame inset 40px and a hard 6px green-tinted offset shadow (the reference's paper-on-desk gag, recolored). No gradients, no noise, no dot grid.
+- Panels: `SURFACE_100` `#1a1a1a`, 2px `rgba(255,255,255,0.3)` border, square corners, 64px header row with a bold title and a muted subtitle, 32px body padding.
+- Typography: JetBrains Mono for everything (via `@remotion/google-fonts`, weights 400/500/700). `FG` primary, `rgba(255,255,255,0.72)` captions, `FG_LIGHT` notes/subtitles.
+- Accents: `GREEN` `#3ecf8e` with `#0f0f0f` text on it (chips: section number, request token, timer when fast, winning option label and bar, takeaway) and `rgba(62,207,142,0.18)` (the question highlight, newest token). Green chips carry a soft `0 0 18px` green glow. `RED` `#f04040` / `rgba(240,64,64,0.2)` only for the LLM's slow timer and garbage tokens. No other color.
 - Layout: shared grid in `src/Components/Blueprint.tsx` — YOUR APP panel at y=250 (h=250), a vertical connector at x=540, the answer panel at y=680, notes under the answer panel, takeaway at y=1600. Every scene places panels on these lines so hard cuts read as continuous.
 - Motion language: the reference cuts hard and types. Entrances are 6-frame fades with a 6px rise (`stamp()`), the "req"/"CLEAN" chip travels linearly along the connector, bars fill linearly, the caret blinks. No springs, no overshoot, no scale.
 - Timing: token typing is deliberately slow (6 f/token clean, 4 f/token garbage) while the timer counts to a red 8.5s; Jev's bars fill together in 30 frames under a yellow 0.1s. Hold the final Jev state for the last ~150 frames.
@@ -28,11 +28,11 @@ This composition deliberately does NOT use the Supabase dark system. Its tokens 
 ## 2. ASSET RULES
 As in `docs/VIDEO_BRIEF_TEMPLATE.md`.
 
-- Jev / TypeSafe AI has no separate product logo; the company's official mark was pulled from typesafe.ai's live site assets, isolated from its pink circle, and recolored (sanctioned for a pure monochrome mark). Variants in `public/assets/`: `jev-mark-white.png`, `jev-mark-green.png` (from the earlier dark iteration), `jev-mark-black.png` (used on the cream canvas in Scene 4's footer).
+- Jev / TypeSafe AI has no separate product logo; the company's official mark was pulled from typesafe.ai's live site assets, isolated from its pink circle, and recolored (sanctioned for a pure monochrome mark). Variants in `public/assets/`: `jev-mark-white.png` (used at 60% in Scene 4's footer), `jev-mark-green.png`, `jev-mark-black.png` (kept for a light-canvas variant).
 - The "normal LLM" is depicted abstractly — no competitor names or marks.
 
 ### Assets batch (run before any scenes)
-1. Jev/TypeSafe mark (black variant) — `public/assets/jev-mark-black.png` — verified in `AssetCheck`.
+1. Jev/TypeSafe mark (white variant) — `public/assets/jev-mark-white.png` — verified in `AssetCheck`.
 
 ## 3. ARCHITECTURE
 - Theme: `src/blueprint.ts` (colors, mono font, `itp`, `stamp`, `fadeOut`). Do not import `src/tokens.ts` or `src/theme.ts` here.

@@ -1,30 +1,34 @@
 /**
  * blueprint.ts — visual system for the JevConfidencePicker composition.
- * Cream "paper" canvas, black hairline panels, mono type, yellow highlight.
- * Deliberately NOT the Supabase dark system — see docs/briefs/jev-confidence-picker.md.
+ * Blueprint layout (hairline panels, mono type, traveling chips, live timer)
+ * on the Supabase dark canvas with green as the single accent.
+ * See docs/briefs/jev-confidence-picker.md.
  */
 import { loadFont, fontFamily } from '@remotion/google-fonts/JetBrainsMono';
 import { interpolate } from 'remotion';
+import { BG, SURFACE_100, GREEN, RED, FG, FG_LIGHT } from './tokens';
 
 loadFont('normal', { weights: ['400', '500', '700'], subsets: ['latin'] });
 
 export const MONO = fontFamily;
 
 export const bp = {
-  paper:      '#f6f5ee',
-  panel:      '#ffffff',
-  ink:        '#1a1a1a',
-  inkSoft:    '#4a4a46',
-  grey:       '#8a8a85',
-  hairline:   '#c9c7bf',
-  yellow:     '#f4c740',
-  yellowPale: '#fdf0c8',
-  red:        '#d9483b',
-  redPale:    '#f8d3cf',
-  barTrack:   '#ffffff',
+  paper:      BG,
+  panel:      SURFACE_100,
+  ink:        FG,
+  inkSoft:    'rgba(255,255,255,0.72)',
+  grey:       FG_LIGHT,
+  line:       'rgba(255,255,255,0.3)',
+  accent:     GREEN,
+  accentPale: 'rgba(62,207,142,0.18)',
+  onAccent:   '#0f0f0f',
+  red:        RED,
+  redPale:    'rgba(240,64,64,0.2)',
+  barDim:     'rgba(255,255,255,0.3)',
 } as const;
 
-export const border = `2px solid ${bp.ink}`;
+export const border = `2px solid ${bp.line}`;
+export const glow = `0 0 18px rgba(62,207,142,0.35)`;
 
 /** Clamped interpolate. */
 export const itp = (frame: number, from: number, to: number, a = 0, b = 1) =>

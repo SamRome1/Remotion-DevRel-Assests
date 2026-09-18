@@ -46,7 +46,7 @@ export const JevBpScored: React.FC = () => {
       <Note text={'no tokens. one parallel pass.\nevery option scored at once.'} top={ANS_Y + JEV_PANEL_H + 50} frame={frame} at={56} />
       <Takeaway line="it can't write. it points at one of YOUR options." chip="0.1 seconds" frame={frame} at={100} />
       <div style={{ position: 'absolute', left: L, top: 1790, display: 'flex', alignItems: 'center', gap: 12, color: bp.grey, fontSize: 20, opacity: itp(frame, 120, 130) }}>
-        <JevMark variant="black" size={18} />
+        <JevMark variant="white" size={18} style={{ opacity: 0.6 }} />
         <span>jev · typesafe.ai</span>
       </div>
     </Frame>
