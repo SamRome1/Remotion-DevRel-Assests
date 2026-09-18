@@ -1,84 +1,74 @@
 # Video Brief — Jev: Pick, Don't Generate
 
 Composition: `JevConfidencePicker` (`src/Compositions/JevConfidencePicker.tsx`), 1080x1920, 30fps, 660 frames (22s).
-Placement: standalone vertical short, visuals only — user is voicing over the entire thing live, so no on-screen VO captions; on-screen text is limited to load-bearing labels (token glyphs, the Jev wordmark, answer options, confidence scores).
+Placement: standalone vertical short, visuals only — user voices over the picture-lock live, so beat timing is the sync target. On-screen text is limited to diagram labels and short takeaway captions.
+
+Reference: the "paper blueprint" explainer style of @MatijaSosic's 45s Jev TL;DR on X (status 2100190746389135772) — sections 01 "How an LLM answers" and 02 "How Jev answers", adapted to 9:16 by stacking the two panels vertically. Sections 03/04 of the reference (game loop, can/can't) are out of scope for this script.
 
 ## 0. Format
 - Canvas: 1080x1920, 30fps
 - Placement / context: standalone 9:16 short
 - Total duration: 660 frames (22s)
-- Voiceover: attached script, paced to match beats below (user records live over picture-lock, so beat timing is the sync target, not literal caption text):
+- Voiceover: attached script, paced to the beats below:
   1. "See a normal llm takes your input and generates an answer one token at a time." → Scene 1
   2. "Which means you can also generate garbage, one token at a time." → Scene 2
-  3. "But jev doesn't actually generate anything, you hand it a list of possible answers and it can only pick from that list with a confidence score." → Scenes 3–4
+  3. "But jev doesn't actually generate anything, you hand it a list of possible answers" → Scene 3
+  4. "and it can only pick from that list with a confidence score." → Scene 4
 
 ## 1. VISUAL SYSTEM — apply to every scene, no exceptions
-- Background: `BG` (#0f0f0f) from `tokens.ts`, with `DotGrid` always mounted first + a slow ambient drift (a faint second dot layer or particles moving at ~2–4px/sec) so the canvas is never static — dense/kinetic per house style, not minimal black.
-- Typography: Circular Std (`circularFamily` from `src/fonts.ts`) for headlines, the Jev wordmark, and confidence-score labels. `MONO` (JetBrains Mono, from `tokens.ts`) for the token stream and any raw-output text — it should read as machine output, not UI copy. `FG` primary, `FG_LIGHT`/`FG_MUTED` secondary.
-- Accent: two accents, justified because this script explicitly contrasts two systems (generic LLM vs. Jev):
-  - `GREEN` (#3ecf8e, from `tokens.ts`) — Jev, confidence, the selected answer.
-  - `WARNING` (#f5a623, from `tokens.ts`) — the generic LLM's ungrounded/garbage generation. Do not introduce a third saturated color; TypeSafe's own brand pink is NOT used anywhere in this video.
-- Layout: full-bleed, content reaches close to the frame edges (per house style — no dead space at top/bottom of the 1920px canvas). Token stream in Scenes 1–2 spans close to full width. Confidence list in Scene 4 fills the lower two-thirds of the canvas.
-- Motion language: entrances use `sp()`/`spSlow()` from `tokens.ts` (damping 18/14, no overshoot except the sanctioned exception below). Stagger siblings 4–8 frames. Exits are quick opacity fades except the Scene 2→3 cut, which is a hard cut (no fade) to land "but jev doesn't actually generate anything" as a genuine tonal break.
-- Emphasis: the winning answer card in Scene 4 is the one deliberate size change in the video — it scales 1.0→1.06 as it locks in, using `glowStyles(progress)` plus a green boxShadow glow. This overshoot-adjacent beat is sanctioned; it's the payoff moment. Every other emphasis moment uses glow/color only, no scale.
-- Timing: Scenes 1–2 move fast and jittery (matches "token by token... garbage" — kinetic, not calm). Scene 3 is a hard, still beat (the pivot). Scene 4 opens fast (parallel evaluation) then holds still on the locked answer for the final ~25 frames — the one deliberate breath in the video.
+This composition deliberately does NOT use the Supabase dark system. Its tokens live in `src/blueprint.ts`.
+- Background: cream paper `#f6f5ee`, with a 2px black frame inset 40px and a hard 6px offset shadow (paper-on-desk look). No gradients, no noise, no dot grid.
+- Panels: white `#ffffff`, 2px black `#1a1a1a` border, square corners, 64px header row with a bold title and a grey subtitle, 32px body padding.
+- Typography: JetBrains Mono for everything (via `@remotion/google-fonts`, weights 400/500/700). Ink `#1a1a1a` primary, `#4a4a46` captions, `#8a8a85` notes/subtitles.
+- Accents: yellow `#f4c740` (chips: section number, request token, timer when fast, winning option, takeaway) and pale yellow `#fdf0c8` (the question highlight, newest token). Red `#d9483b` / pale red `#f8d3cf` only for the LLM's slow timer and garbage tokens. No other color.
+- Layout: shared grid in `src/Components/Blueprint.tsx` — YOUR APP panel at y=250 (h=250), a vertical connector at x=540, the answer panel at y=680, notes under the answer panel, takeaway at y=1600. Every scene places panels on these lines so hard cuts read as continuous.
+- Motion language: the reference cuts hard and types. Entrances are 6-frame fades with a 6px rise (`stamp()`), the "req"/"CLEAN" chip travels linearly along the connector, bars fill linearly, the caret blinks. No springs, no overshoot, no scale.
+- Timing: token typing is deliberately slow (6 f/token clean, 4 f/token garbage) while the timer counts to a red 8.5s; Jev's bars fill together in 30 frames under a yellow 0.1s. Hold the final Jev state for the last ~150 frames.
 
 ## 2. ASSET RULES
 As in `docs/VIDEO_BRIEF_TEMPLATE.md`.
 
-- Jev / TypeSafe AI has no separate product-specific logo; the company's official brand mark (interlocking hexagon icon) was pulled from `typesafe.ai`'s live site assets (favicon/OG image, confirmed identical across both), isolated from its pink circle background, and recolored per "logos on black: use white/light variants" (sanctioned for pure monochrome marks). Two variants were produced:
-  - `public/assets/jev-mark-white.png` — neutral use (Scene 3 reveal)
-  - `public/assets/jev-mark-green.png` — lit/active use (Scene 4, top of the confidence list)
-- No other third-party logos are used in this video (the "normal LLM" is depicted abstractly — a generic token stream, never a specific competitor's name or mark).
+- Jev / TypeSafe AI has no separate product logo; the company's official mark was pulled from typesafe.ai's live site assets, isolated from its pink circle, and recolored (sanctioned for a pure monochrome mark). Variants in `public/assets/`: `jev-mark-white.png`, `jev-mark-green.png` (from the earlier dark iteration), `jev-mark-black.png` (used on the cream canvas in Scene 4's footer).
+- The "normal LLM" is depicted abstractly — no competitor names or marks.
 
 ### Assets batch (run before any scenes)
-1. Jev/TypeSafe mark (white variant) — extracted from typesafe.ai brand assets, saved to `public/assets/jev-mark-white.png`
-2. Jev/TypeSafe mark (green variant) — same source, recolored, saved to `public/assets/jev-mark-green.png`
-
-**Both assets exist locally as of this brief. Stop and report the file list before proceeding. Do not build scenes until confirmed via the `AssetCheck` composition.**
+1. Jev/TypeSafe mark (black variant) — `public/assets/jev-mark-black.png` — verified in `AssetCheck`.
 
 ## 3. ARCHITECTURE
-- Colors/fonts/spacing/spring helpers come from the existing `src/tokens.ts` and `src/fonts.ts` — no new theme file. Do not use `src/theme.ts` (that file is the separate ShortForm system: Inter + Postgres blue on 1080x1080/1080x1080; unrelated to this brief).
-- New reusable components in `src/Components/`:
-  - `<TokenStream>` — renders a wrapping stream of tokens appearing one at a time (mono). Takes a `corrupt` progress prop (0–1): at 0 tokens are clean English words in `FG`; as it rises toward 1, tokens glitch (jumbled glyphs, `WARNING` color, slight jitter transform). Load-bearing for Scenes 1 and 2 — build once, drive with different prop values, not two one-off implementations.
-  - `<JevMark>` — renders the icon from `public/assets/jev-mark-{white|green}.png` at a given size with an optional glow (`glowStyles`). Load-bearing for Scenes 3 and 4.
-  - `<ConfidenceList>` — renders a vertical stack of answer-option cards, each with a label and a confidence percentage; takes a `selectedIndex` and `lockProgress` to animate the winner's glow/scale-up and the others' dim-out. Load-bearing for Scene 4 only, but still built as a component per the architecture rule (not one-off JSX).
-- Each scene is its own file in `src/scenes/`, sequenced with `<Series>` in `src/Compositions/JevConfidencePicker.tsx`, and the composition registered in `Root.tsx`. Prefix scene files `Jev*` to avoid colliding with the existing OpenAI/Postgres scene files already in `src/scenes/`.
+- Theme: `src/blueprint.ts` (colors, mono font, `itp`, `stamp`, `fadeOut`). Do not import `src/tokens.ts` or `src/theme.ts` here.
+- Shared components in `src/Components/Blueprint.tsx`: `Frame`, `SectionTitle`, `Panel`, `AppPanel`, `Chip`, `Highlight`, `Connector` (with traveling chip), `Timer`, `TypedTokens`, `ScoreRow`, `Note`, `Takeaway`. Plus `JevMark` (`src/Components/JevMark.tsx`).
+- Load-bearing: `AppPanel` + `Connector` + the layout constants appear in all four scenes; `TypedTokens`/`Timer` in Scenes 1–2; `ScoreRow` in Scenes 3–4 (`OPTIONS` and `JEV_PANEL_H` are exported from Scene 3 and reused by Scene 4).
+- Scenes are one file each in `src/scenes/` (prefixed `JevBp*`), sequenced with `<Series>` in the composition, registered in `Root.tsx`.
 
 ## 4. SCENES
 
-### Scene 1 — TokenStream (0–170f, 5.67s)
-Beat A (0–20f): black canvas, DotGrid fades in. A thin mono input line types out fast at the top third (e.g. a short generic prompt like `> summarize this ticket`), syncs to "takes your input".
-Beat B (20–170f): below it, `<TokenStream corrupt={0}>` streams out clean words one at a time, left-to-right, wrapping to new lines, each token popping in with a quick `sp()` scale/opacity — deliberately fast (roughly 1 token every 4–5 frames) to feel like real generation. Syncs to "generates an answer one token at a time." Tokens are neutral `FG` white/grey — no accent color yet, this is the unbranded "normal LLM."
-On-screen text: the input line + streaming tokens (invented generic filler words, not real scraped text).
-Load-bearing components: `<TokenStream>` (also used Scene 2).
+### Scene 1 — LlmClean (0–165f, 5.5s)
+Beat A (0–20f): section title "01 HOW AN LLM ANSWERS" stamps in; YOUR APP panel with "is this invoice fraud?" (pale-yellow highlight); the LLM panel ("LLM generating...") stamps in empty; the connector draws.
+Beat B (30–48f): a yellow "req" chip travels down the connector into the LLM panel; the grey timer appears at 0.0s.
+Beat C (50–152f): 17 tokens type out at 6 f/token — "Based on the line items and the vendor history , this invoice appears to be legitimate ." — newest token pale-yellow, block caret blinking. Timer counts 0.0→8.5s and turns into a red chip on the last token.
+Beat D (128–165f): takeaway "it writes a sentence, one token at a time." + yellow chip "8.5 seconds".
+On-screen text: as above.
 Sanctioned exceptions: none.
 
-### Scene 2 — Garbage (170–290f, 4s)
-Beat A (0–60f): `<TokenStream>` continues from Scene 1's end state, `corrupt` ramping 0→0.6 — tokens start jittering slightly, a few glyphs flip to `WARNING` amber, occasional nonsense fragments creep in among real words. Syncs to "which means you can also generate garbage."
-Beat B (60–120f): `corrupt` ramps 0.6→1 — most of the stream is now amber, jittery, visibly nonsensical (glyph soup, mismatched fragments), motion gets faster/more chaotic (higher jitter amplitude, tighter stagger). Syncs to "one token at a time" landing on the second, ironic repetition.
-On-screen text: the same evolving token stream, now degrading.
-Load-bearing components: `<TokenStream>` (shared instance/logic from Scene 1).
-Sanctioned exceptions: none.
+### Scene 2 — LlmGarbage (165–290f, 4.2s)
+Same layout, already in place (no re-entrance). The LLM body is empty again, timer back to 0.0s.
+Beat A (0–16f): "req" chip travels down again.
+Beat B (18–102f): 21 tokens at 4 f/token — "Based on the vendor history , this invoice is fraud . Actually it is legitimate . Approve and refund twice ." From token 12 ("Actually") on, tokens are red on pale red; the newest bad token is solid red with paper text. Timer counts to a red 8.5s.
+Beat C (88–125f): takeaway "same process. same confidence. garbage." + pale-red chip "one token at a time".
+Sanctioned exceptions: red is used here (the only place besides the slow timer).
 
-### Scene 3 — JevReveal (290–380f, 3s)
-HARD CUT from Scene 2 — no fade, no transition. This is the tonal pivot ("But jev doesn't actually generate anything").
-Beat A (0f): instant cut to pure black, all token noise gone.
-Beat B (10–70f): `<JevMark variant="white">` scales/fades in centered (`spSlow`, 0.98→1.0, no overshoot), followed 8 frames later by the "Jev" wordmark in Circular Std beneath it (letter-spacing 1, weight synthesized bold acceptable).
-Beat C (70–90f): hold the assembled lockup — this is the beat that carries "doesn't actually generate anything," give it room to breathe.
-On-screen text: "Jev" only.
-Load-bearing components: `<JevMark>` (also used Scene 4).
-Sanctioned exceptions: none.
+### Scene 3 — HandOptions (290–380f, 3s)
+HARD CUT.
+Beat A (0–30f): title "02 HOW JEV ANSWERS", YOUR APP panel (same place), JEV panel ("JEV your options, scored"), connector draws — no chip yet.
+Beat B (30–60f): three option rows FRAUD / CLEAN / REVIEW stamp in 12 frames apart with empty bars and no numbers — the list is the user's, not Jev's.
+Beat C (64–90f): grey note "you hand it the list. / it can't add to it." Hold.
 
-### Scene 4 — ConfidencePicker (380–660f, 9.33s)
-The payoff — spend the most effort here.
-Beat A (0–30f): `<JevMark variant="green" size="small">` docks to the top of the frame. Below it, `<ConfidenceList>` mounts with 4 answer-option cards (invented generic short labels, e.g. "Escalate to human", "Auto-approve", "Flag for review", "Reject"), each entering staggered 6 frames apart, all shown at a neutral/dim state with placeholder confidence values ticking rapidly (like they're being scored). Syncs to "you hand it a list of possible answers."
-Beat B (30–90f): all 4 cards pulse together — a quick simultaneous glow ripple across all of them (NOT sequential/token-by-token — this is the whole point of the contrast: parallel evaluation, not generation) — while each card's confidence percentage rapidly counts/flickers through numbers. Syncs to "it can only pick from that list."
-Beat C (90–140f): three cards dim to `FG_MUTED` and stop flickering; their percentages settle low (e.g. 4%, 9%, 11%). The winning card's percentage settles high (e.g. 94%) and the card scales 1.0→1.06, gets the `GREEN` glow via `glowStyles`, and a 1px green border brightens. This is the one sanctioned scale-emphasis in the video. Syncs to "with a confidence score."
-Beat D (140–280f): HOLD. ~140 frames of stillness on the locked winning card with its confidence score — no new elements, no camera move. This is the closing image; resist adding anything else.
-On-screen text: the 4 option labels and their confidence percentages only.
-Load-bearing components: `<JevMark>`, `<ConfidenceList>`.
-Sanctioned exceptions: the winning card's scale-up (see Motion language above).
+### Scene 4 — Scored (380–660f, 9.3s)
+Beat A (0–18f): "req" chip travels down; timer appears 0.0s.
+Beat B (18–52f): timer ticks to 0.1s and becomes a yellow chip; all three bars fill simultaneously (0.07 / 0.88 / 0.05, numbers counting) — parallel, not staggered. CLEAN's label turns yellow at f46; its bar is black, the others grey.
+Beat C (56–86f): grey note "no tokens. one parallel pass. / every option scored at once."; a "CLEAN" chip travels back up the connector to YOUR APP.
+Beat D (100–130f): takeaway "it can't write. it points at one of YOUR options." + yellow chip "0.1 seconds"; small footer "jev · typesafe.ai" with the black mark.
+Beat E (130–280f): HOLD on the finished state.
 
 ## 5. Delivery
 - Render target: `out/JevConfidencePicker.mp4`

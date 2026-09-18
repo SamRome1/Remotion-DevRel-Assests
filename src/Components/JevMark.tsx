@@ -5,12 +5,12 @@ const ASPECT = 298 / 206; // height / width, from the cropped mark asset
 
 /** TypeSafe/Jev brand mark. `glow` (0-1) drives a white or green drop-shadow. */
 export const JevMark: React.FC<{
-  variant: 'white' | 'green';
+  variant: 'white' | 'green' | 'black';
   size?: number;
   glow?: number;
   style?: React.CSSProperties;
 }> = ({ variant, size = 160, glow = 0, style }) => {
-  const src = variant === 'white' ? 'assets/jev-mark-white.png' : 'assets/jev-mark-green.png';
+  const src = `assets/jev-mark-${variant}.png`;
   const rgb = variant === 'green' ? '62,207,142' : '255,255,255';
 
   return (

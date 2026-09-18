@@ -17,6 +17,7 @@ export const ASSET_FILES = [
   'supabase.svg',
   'jev-mark-white.png',
   'jev-mark-green.png',
+  'jev-mark-black.png',
 ];
 
 export const AssetCheck: React.FC = () => (
