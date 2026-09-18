@@ -105,6 +105,7 @@ import { GeminiSupabaseIntro } from "./GeminiSupabaseIntro";
 import { TimeToOneMillionUsers } from "./TimeToOneMillionUsers";
 import { JevConfidencePicker, JEV_CONFIDENCE_PICKER_DURATION } from "./JevConfidencePicker";
 import { JevCommentModeration, JEV_COMMENT_MODERATION_DURATION } from "./JevCommentModeration";
+import { JevMysteryLogo, JEV_MYSTERY_LOGO_DURATION } from "./JevMysteryLogo";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -929,6 +930,14 @@ export const RemotionRoot: React.FC = () => {
         id="JevCommentModeration"
         component={JevCommentModeration}
         durationInFrames={JEV_COMMENT_MODERATION_DURATION}
+        fps={30}
+        width={1080}
+        height={1080}
+      />
+      <Composition
+        id="JevMysteryLogo"
+        component={JevMysteryLogo}
+        durationInFrames={JEV_MYSTERY_LOGO_DURATION}
         fps={30}
         width={1080}
         height={1080}
