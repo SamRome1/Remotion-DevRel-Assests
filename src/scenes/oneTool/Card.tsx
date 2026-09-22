@@ -35,14 +35,26 @@ type CardProps = Rect & {
   frame: number;
   at: number;
   title: string;
+  subtitle?: string;
   right?: React.ReactNode;
   pad?: number;
+  /** Fly into the canvas center at T.ONE (OneTool only). Default true. */
+  collapse?: boolean;
   children: React.ReactNode;
 };
 
+const Static: React.FC<Rect & { children: React.ReactNode }> = ({ x, y, w, h, children }) => (
+  <div style={{ position: 'absolute', left: x, top: y, width: w, height: h }}>{children}</div>
+);
+
 /** White window card with macOS chrome and a mono title. */
-export const Card: React.FC<CardProps> = ({ x, y, w, h, frame, at, title, right, pad = 24, children }) => (
-  <Collapse x={x} y={y} w={w} h={h} frame={frame} delay={Math.hypot(x + w / 2 - CX, y + h / 2 - CY) / 90}>
+export const Card: React.FC<CardProps> = ({ x, y, w, h, frame, at, title, subtitle, right, pad = 24, collapse = true, children }) => {
+  const Wrap: React.FC<{ children: React.ReactNode }> = ({ children: c }) =>
+    collapse
+      ? <Collapse x={x} y={y} w={w} h={h} frame={frame} delay={Math.hypot(x + w / 2 - CX, y + h / 2 - CY) / 90}>{c}</Collapse>
+      : <Static x={x} y={y} w={w} h={h}>{c}</Static>;
+  return (
+  <Wrap>
     <div
       style={{
         ...enterStyle(frame, at),
@@ -75,12 +87,16 @@ export const Card: React.FC<CardProps> = ({ x, y, w, h, frame, at, title, right,
         <div style={{ marginLeft: 12, fontFamily: CODE, fontSize: 14, letterSpacing: 2, color: INK_3, textTransform: 'uppercase' }}>
           {title}
         </div>
+        {subtitle && (
+          <div style={{ marginLeft: 4, fontFamily: CODE, fontSize: 14, letterSpacing: 1, color: LINE_2 }}>· {subtitle}</div>
+        )}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>{right}</div>
       </div>
       <div style={{ flex: 1, padding: pad, position: 'relative' }}>{children}</div>
     </div>
-  </Collapse>
-);
+  </Wrap>
+  );
+};
 
 /** Small rounded pill. */
 export const Pill: React.FC<{ color: string; bg: string; children: React.ReactNode; style?: React.CSSProperties }> = ({

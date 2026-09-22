@@ -108,6 +108,7 @@ import { JevCommentModeration, JEV_COMMENT_MODERATION_DURATION } from "./JevComm
 import { JevMysteryLogo, JEV_MYSTERY_LOGO_DURATION } from "./JevMysteryLogo";
 import { OneTool, ONE_TOOL_DURATION } from "./OneTool";
 import { EverySwing, EVERY_SWING_DURATION } from "./EverySwing";
+import { JevSinglePass, JEV_SINGLE_PASS_DURATION } from "./JevSinglePass";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -956,6 +957,14 @@ export const RemotionRoot: React.FC = () => {
         id="EverySwing"
         component={EverySwing}
         durationInFrames={EVERY_SWING_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="JevSinglePass"
+        component={JevSinglePass}
+        durationInFrames={JEV_SINGLE_PASS_DURATION}
         fps={30}
         width={1920}
         height={1080}
