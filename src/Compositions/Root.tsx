@@ -113,6 +113,7 @@ import { Classifiers, CLASSIFIERS_DURATION } from "./Classifiers";
 import { MlPipeline, ML_PIPELINE_DURATION } from "./MlPipeline";
 import { NewProject, NEW_PROJECT_DURATION } from "./NewProject";
 import { HammerPrices, HAMMER_PRICES_DURATION } from "./HammerPrices";
+import { EasyToUse, EASY_TO_USE_DURATION } from "./EasyToUse";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -1001,6 +1002,14 @@ export const RemotionRoot: React.FC = () => {
         id="HammerPrices"
         component={HammerPrices}
         durationInFrames={HAMMER_PRICES_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="EasyToUse"
+        component={EasyToUse}
+        durationInFrames={EASY_TO_USE_DURATION}
         fps={30}
         width={1920}
         height={1080}
