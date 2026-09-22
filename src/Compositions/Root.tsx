@@ -112,6 +112,7 @@ import { JevSinglePass, JEV_SINGLE_PASS_DURATION } from "./JevSinglePass";
 import { Classifiers, CLASSIFIERS_DURATION } from "./Classifiers";
 import { MlPipeline, ML_PIPELINE_DURATION } from "./MlPipeline";
 import { NewProject, NEW_PROJECT_DURATION } from "./NewProject";
+import { HammerPrices, HAMMER_PRICES_DURATION } from "./HammerPrices";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -992,6 +993,14 @@ export const RemotionRoot: React.FC = () => {
         id="NewProject"
         component={NewProject}
         durationInFrames={NEW_PROJECT_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="HammerPrices"
+        component={HammerPrices}
+        durationInFrames={HAMMER_PRICES_DURATION}
         fps={30}
         width={1920}
         height={1080}
