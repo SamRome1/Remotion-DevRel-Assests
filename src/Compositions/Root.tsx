@@ -110,6 +110,7 @@ import { OneTool, ONE_TOOL_DURATION } from "./OneTool";
 import { EverySwing, EVERY_SWING_DURATION } from "./EverySwing";
 import { JevSinglePass, JEV_SINGLE_PASS_DURATION } from "./JevSinglePass";
 import { Classifiers, CLASSIFIERS_DURATION } from "./Classifiers";
+import { MlPipeline, ML_PIPELINE_DURATION } from "./MlPipeline";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -974,6 +975,14 @@ export const RemotionRoot: React.FC = () => {
         id="Classifiers"
         component={Classifiers}
         durationInFrames={CLASSIFIERS_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="MlPipeline"
+        component={MlPipeline}
+        durationInFrames={ML_PIPELINE_DURATION}
         fps={30}
         width={1920}
         height={1080}
