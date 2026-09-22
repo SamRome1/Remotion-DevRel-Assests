@@ -106,6 +106,7 @@ import { TimeToOneMillionUsers } from "./TimeToOneMillionUsers";
 import { JevConfidencePicker, JEV_CONFIDENCE_PICKER_DURATION } from "./JevConfidencePicker";
 import { JevCommentModeration, JEV_COMMENT_MODERATION_DURATION } from "./JevCommentModeration";
 import { JevMysteryLogo, JEV_MYSTERY_LOGO_DURATION } from "./JevMysteryLogo";
+import { OneTool, ONE_TOOL_DURATION } from "./OneTool";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -940,6 +941,14 @@ export const RemotionRoot: React.FC = () => {
         durationInFrames={JEV_MYSTERY_LOGO_DURATION}
         fps={30}
         width={1080}
+        height={1080}
+      />
+      <Composition
+        id="OneTool"
+        component={OneTool}
+        durationInFrames={ONE_TOOL_DURATION}
+        fps={30}
+        width={1920}
         height={1080}
       />
       <Composition
