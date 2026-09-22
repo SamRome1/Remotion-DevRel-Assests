@@ -109,6 +109,7 @@ import { JevMysteryLogo, JEV_MYSTERY_LOGO_DURATION } from "./JevMysteryLogo";
 import { OneTool, ONE_TOOL_DURATION } from "./OneTool";
 import { EverySwing, EVERY_SWING_DURATION } from "./EverySwing";
 import { JevSinglePass, JEV_SINGLE_PASS_DURATION } from "./JevSinglePass";
+import { Classifiers, CLASSIFIERS_DURATION } from "./Classifiers";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -965,6 +966,14 @@ export const RemotionRoot: React.FC = () => {
         id="JevSinglePass"
         component={JevSinglePass}
         durationInFrames={JEV_SINGLE_PASS_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
+      />
+      <Composition
+        id="Classifiers"
+        component={Classifiers}
+        durationInFrames={CLASSIFIERS_DURATION}
         fps={30}
         width={1920}
         height={1080}
